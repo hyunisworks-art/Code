@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<!--
+  index.html: スト6 コンボ入力ツールの単一ページHTML。
+  - 依存: `script.js` がグローバルIDに依存するため、要素IDを変更する場合は必ず `script.js` を更新すること。
+  - このファイルにビルドステップは不要。ブラウザで直接開いて動作確認してください。
+  ローカルサーバー起動：python -m http.server 8000
+  シンプルブラウザー起動：http://localhost:8000 
+-->
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>スト6コンボ入力ツール</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+  </head>
+    <body>
+      <!-- ヘッダー -->
+      <div class="header">
+        <div class="header-left">
+          <h1>スト6 コンボ入力ツール</h1>
+          <button id="helpBtn" class="tiny-button">使い方</button>
+        </div>
+        <div class="header-search">
+          <small class="search-label">検索</small>
+          <input type="text" id="comboSearch" class="combo-search-input" placeholder="出力内容で検索">
+          <button id="clearSearchBtn" class="search-clear-btn" title="検索をクリア">クリア</button>
+          <span id="searchResult" class="search-result-label"></span>
+        </div>
+      </div>
+      <!-- メイン -->
+      <div class="container">
+        <!-- 左カラム -->
+        <div class="panel">
+          <div class="mode-toggle-container">
+            <div class="mode-section">
+              <div class="section-title">表示モード切替</div>
+              <div class="mode-select">
+                <label><input type="radio" name="mode" value="arrow"> 矢印</label>
+                <label><input type="radio" name="mode" value="number" checked> 数字</label>
+              </div>
+            </div>
+            <div class="mode-section">
+              <div class="section-title">操作モード切替</div>
+              <div class="mode-select">
+                <label><input type="radio" name="style" value="classic" checked> クラシック</label>
+                <label><input type="radio" name="style" value="modern"> モダン</label>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="column" id="direction-area">
+              <div class="section-title">方向キー</div>
+              
+              <div class="button-grid grid-3x3" id="directionGrid"></div>
+              
+              <hr class="divider">
+              
+              <div class="button-grid grid-3x2" id="specialDirections"></div>
+              <div id="specialDirectionsExtra" class="special-row-3"></div>
+            </div>
+            
+            <div class="column" id="attack-area">
+              
+              <div id="classic-buttons">
+                <div class="section-title">技ボタン（クラシック）</div>
+                <div class="button-grid grid-4x2" id="classicButtons"></div>
+                <hr class="divider">
+                <div class="button-grid grid-3x3" id="saButtons"></div>
+                <hr class="divider">
+                <div class="button-grid grid-3x1" id="specialCommandButtons"></div>
+                <div id="specialCommandExtra" class="special-row-2"></div>
+              </div>
+              
+              <div id="modern-buttons" class="hidden">
+                <div class="section-title">技ボタン（モダン）</div>
+                <div id="modernButtons"></div>
+                <hr class="divider">
+                <div class="button-grid grid-3x3" id="saButtonsModern"></div>
+                <hr class="divider">
+                <div class="button-grid grid-3x1" id="specialCommandButtonsModern"></div>
+                <div id="specialCommandExtraModern" class="special-row-2"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-title collapsible collapsed" id="specialInputsHeader">特殊入力</div>
+          <div class="collapsible-content">
+            <div class="button-grid grid-4x4-special" id="specialInputs"></div>
+          </div>
+
+          <div class="section-title collapsible collapsed" id="comboPartsHeader">コンボパーツ</div>
+          <div class="collapsible-content">
+            <div class="combo-parts-form">
+              <div class="parts-input-row">
+                <input type="text" id="partName" class="part-name-input" placeholder="パーツ名">
+                <input type="text" id="partComposition" class="part-composition-input" placeholder="構成（例：214中PJ→DR→5強P）">
+                <input type="text" id="partDriveGauge" class="part-drive-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" placeholder="Dg">
+                <button id="savePartBtn" class="tiny-button">登録</button>
+              </div>
+            </div>
+            <div id="comboPartsList" class="combo-parts-list"></div>
+          </div>
+          
+          <div class="section-title-row">
+            <span class="section-title">出力</span>
+            <span id="outputCode" class="output-code-label"></span>
+            <span id="duplicateWarning" class="duplicate-label"></span>
+            <div class="sa-damage-group">
+              <label for="sa1Damage">SA1</label>
+              <input id="sa1Damage" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="5" class="sa-damage-input">
+              <label for="sa2Damage">SA2</label>
+              <input id="sa2Damage" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="5" class="sa-damage-input">
+              <label for="sa3Damage">SA3</label>
+              <input id="sa3Damage" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="5" class="sa-damage-input">
+            </div>
+            <div class="damage-row">
+              <label for="damage">ダメージ</label>
+              <input id="damage" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="5">
+            </div>
+          </div>
+
+          <textarea class="display-box" id="output" rows="3" placeholder="ここにコンボが表示されます"></textarea>
+
+          <div class="section-title">メモ</div>
+          <textarea class="memo-box" id="memo" rows="4" placeholder="フレーム数や解説を入力"></textarea>
+          <div class="control">
+            <button id="copyBtn">クリップコピー</button>
+            <button id="clearBtn">クリア</button>
+            <button id="saveComboBtn">コンボ保存</button>
+          </div>
+          <div class="section-title section-title-row">
+            保存機能
+            <button id="openJsonBtn" class="tiny-button">コンボ読込</button>
+            <button id="exportJsonBtn" class="tiny-button">コンボ書出</button>
+            <span style="margin: 0 8px; color: #aaa;">|</span>
+            <button id="importPartsBtn" class="tiny-button">パーツ読込</button>
+            <button id="exportPartsBtn" class="tiny-button">パーツ書出</button>
+          </div>
+          <div class="frame-data-link">
+            <a href="https://www.streetfighter.com/6/ja-jp/character/luke/frame" target="_blank">ルークフレームデータ</a>
+          </div>
+        </div>
+    <!-- 右カラム -->
+        <div class="panel">
+          <div class="section-title section-title-row">
+            <span>コンボ一覧</span>
+            <span id="comboCount" class="combo-count">0件</span>
+            <div class="filter-container">
+              <div class="filter-group">
+                <small class="filter-label">位置</small>
+                <select id="screenPositionFilter" class="tiny-select"></select>
+              </div>
+
+              <div class="filter-group">
+                <small>始動</small>
+                <select id="startupTechFilter" class="tiny-select"></select>
+              </div>
+
+              <div class="filter-group">
+                <small>条件</small>
+                <select id="filterKey" class="tiny-select"></select>
+              </div>
+            </div>
+          </div>
+          <div id="comboList" class="combo-list"></div>
+        </div>
+    </div>
+
+    <!-- モーダルオーバーレイ -->
+    <div id="overlay"></div>
+    <div id="infoModal">
+      <div class="modal-content">
+        <button id="closeModal">✕</button>
+        <h2 id="modalTitle"></h2>
+        <div id="modalBody"></div>
+      </div>
+    </div>
+    <!-- JS指定 -->
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,17 @@
+[
+  {
+    "name": "ラッシュナックル",
+    "composition": "214中PJ→DR→5強P→214強PJ",
+    "driveGauge": 1
+  },
+  {
+    "name": "DDT",
+    "composition": "214PP→PP",
+    "driveGauge": 3
+  },
+  {
+    "name": "トリプルナックル",
+    "composition": "214中PJ→214弱PJ→214強P",
+    "driveGauge": 0
+  }
+]

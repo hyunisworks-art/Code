@@ -1,0 +1,130 @@
+{
+  "arrowMap": {
+    "1": "↙",
+    "2": "↓",
+    "3": "↘",
+    "4": "←",
+    "5": "N",
+    "6": "→",
+    "7": "↖",
+    "8": "↑",
+    "9": "↗"
+  },
+  "buttons": {
+    "specialDirections": [
+      { "text": "波動", "value": "236" },
+      { "text": "昇龍", "value": "623" },
+      { "text": "竜巻", "value": "214" },
+      { "text": "ヨガ", "value": "41236" },
+      { "text": "タメ", "value": "T" },
+      { "text": "ジャスト", "value": "J" }
+    ],
+    "specialDirectionsExtra": [
+      { "text": "Cラッシュ", "value": "CR", "longText": true },
+      { "text": "Dラッシュ", "value": "DR", "longText": true },
+      { "text": "ジャンプ", "value": "ジャンプ", "longText": false }
+    ],
+    "specialCommandExtra": [
+      { "text": "カウンター時", "value": "(カウンター)", "class": "btn-counter" },
+      { "text": "パニカン時", "value": "(パニカン)", "class": "btn-punish" }
+    ],
+    "specialCommands": [
+      { "text": "＋", "value": "+" },
+      { "text": "→（次へ）", "value": "→" }
+    ],
+    "classicAttacks": [
+      { "text": "P", "value": "P", "class": "btn-pk-essential" },
+      { "text": "弱P", "value": "弱P", "class": "btn-small" },
+      { "text": "中P", "value": "中P", "class": "btn-middle" },
+      { "text": "強P", "value": "強P", "class": "btn-large" },
+      { "text": "K", "value": "K", "class": "btn-pk-essential" },
+      { "text": "弱K", "value": "弱K", "class": "btn-small" },
+      { "text": "中K", "value": "中K", "class": "btn-middle" },
+      { "text": "強K", "value": "強K", "class": "btn-large" }
+    ],
+    "modernAttacks": [
+      { "text": "弱", "value": "弱", "class": "btn-small" },
+      { "text": "中", "value": "中", "class": "btn-middle" },
+      { "text": "強", "value": "強", "class": "btn-large" },
+      { "text": "必殺", "value": "必殺", "class": "btn-pk-essential" },
+      { "text": "アシスト", "value": "アシスト", "class": "" }
+    ],
+    "specialInputs": [
+      { "text": "壁限定", "value": "(壁限定)" },
+      { "text": "前ステ", "value": "(前ステ)" },
+      { "text": "遅らせ", "value": "(遅らせ)" },
+      { "text": "微歩き", "value": "(微歩き)" },
+      { "text": "インパクト", "value": "(インパクト)" },
+      { "text": "起き攻め", "value": "(起き攻め)" }
+    ]
+  },
+  "filters": {
+    "screenPosition": [
+      { "value": "all", "text": "すべて" },
+      { "value": "center", "text": "中央" },
+      { "value": "corner", "text": "壁限定" }
+    ],
+    "startupTech": [
+      { "value": "all", "text": "すべて" },
+      { "value": "2弱P", "text": "2弱P" },
+      { "value": "5弱P", "text": "5弱P" },
+      { "value": "2弱K", "text": "2弱K" },
+      { "value": "2中P", "text": "2中P" },
+      { "value": "5中P", "text": "5中P" },
+      { "value": "2中K", "text": "2中K" },
+      { "value": "2強P", "text": "2強P" },
+      { "value": "5強P", "text": "5強P" },
+      { "value": "214中P", "text": "214中P" },
+      { "value": "DR", "text": "DR" }
+    ],
+    "condition": [
+      { "value": "all", "text": "すべて" },
+      { "value": "noSpecial", "text": "特殊なし" },
+      { "value": "fav", "text": "お気に入り" },
+      { "value": "counter", "text": "カウンター" },
+      { "value": "punish", "text": "パニカン" },
+      { "value": "impact", "text": "インパクト" },
+      { "value": "okizeme", "text": "起き攻め" },
+      { "value": "noSA", "text": "SAなし" },
+      { "value": "SA1", "text": "SA1" },
+      { "value": "SA2", "text": "SA2" },
+      { "value": "SA3", "text": "SA3" }
+    ]
+  },
+  "localStorage": {
+    "combosKey": "sf6_savedCombos_v1",
+    "codeCounterKey": "sf6_comboCodeCounter_v1",
+    "damageKey": "sf6_damage",
+    "sa1DamageKey": "sf6_sa1Damage",
+    "sa2DamageKey": "sf6_sa2Damage",
+    "sa3DamageKey": "sf6_sa3Damage",
+    "sortKey": "sf6_sortKey",
+    "filterKey": "sf6_filterKey",
+    "screenPositionFilterKey": "sf6_screenPositionFilter",
+    "startupTechFilterKey": "sf6_startupTechFilter"
+  },
+  "ui": {
+    "titlePrefix": "C",
+    "titleDigits": 4,
+    "outputPlaceholder": "ここにコンボが表示されます",
+    "memoPlaceholder": "メモを入力",
+    "damageMaxLength": 5
+  },
+  "help": {
+    "title": "使い方の説明",
+    "items": [
+      { "label": "表示モード切替", "description": "方向キーの表記を「矢印」か「数字」に切り替えます。" },
+      { "label": "方向キー", "description": "方向キーを使って入力します。数字キーでも入力可能です。" },
+      { "label": "操作モード切替", "description": "ボタン入力を「クラシック」か「モダン」に切り替えます。" },
+      { "label": "ボタン入力", "description": "パンチ・キックや各種特殊入力をボタンで入力します。" },
+      { "label": "→(次へ)", "description": "技の区切りとして「→」を入力します。右矢印キーでも入力できます。" },
+      {"label":"特殊入力","description":"(壁限定)(遅らせ)などの特殊条件を入力します。"},
+      { "label": "コンボパーツ", "description": "コンボパーツを登録・呼び出しできます。" },
+      {"label":"出力欄","description":"ここに入力したコンボが表示されます。"},
+      { "label": "ダメージ", "description": "ダメージを数字で入力します（一覧にも保存されます）。" },
+      { "label": "メモ", "description": "メモ欄です。コンボと別行で、コピー時に一緒に入ります。" },
+      { "label": "保存機能", "description": "保存すると「一覧」に追加されます。" },
+      { "label": "コンボ一覧", "description": "保存したコンボを一覧で表示します。フィルターやソートも可能です。" }
+    ]
+  }
+}
