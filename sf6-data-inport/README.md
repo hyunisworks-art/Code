@@ -315,6 +315,20 @@ cd "c:\Users\hyuni\OneDrive\ドキュメント\GitHub\Code\sf6-data-inport"
 & "c:/Users/hyuni/OneDrive/ドキュメント/GitHub/Code/.venv/Scripts/pip.exe" install streamlit plotly pandas
 ```
 
+### 個別トレーニング提案（ユーザーコード診断）
+
+ダッシュボード下部の「個別トレーニング提案」で、次を入力すると個別課題を表示します。
+
+1. ユーザーコード（short_id）
+2. 目標ランク
+3. 必要なら Cookie（未入力時は `.buckler_cookie.txt` を利用）
+
+特徴:
+
+1. 傾向分析用CSVに本人データがなくても診断可能（ユーザーコードから最新データを直接取得）
+2. 良い部分（強み）と不足部分（優先課題）を分けて表示
+3. プレイ時間系は別軸で評価し、実戦量不足かトレモ優先かを提案
+
 ## 動作環境
 
 - Python 3.13+
