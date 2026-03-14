@@ -99,11 +99,7 @@ cd "c:\Users\hyuni\OneDrive\ドキュメント\GitHub\Code\sf6-data-inport"
 
 # 本実行（約10ページ × 20人 = 200人をランダム層化サンプリング）
 & "c:/Users/hyuni/OneDrive/ドキュメント/GitHub/Code/.venv/Scripts/python.exe" collect_playlog.py `
-   --ranking-type league `
-   --start-page 1 `
-   --end-page 466913 `
-   --page-step 100000 `
-   --random-start-offset
+--ranking-type league --start-page 245000 --end-page 294000 --page-step 5000 --random-start-offset --random-seed 303 --limit 50 --delay 2.0
 ```
 
 ### 4. 主なオプション
@@ -130,7 +126,7 @@ cd "c:\Users\hyuni\OneDrive\ドキュメント\GitHub\Code\sf6-data-inport"
 1. 末尾に `完了: 更新=... 新規追加=... エラー=... スキップ=...` が出ること
 2. `エラー=0` であること
 3. `sf6-playlog-out.csv` の実績列（列6以降）が更新されていること
-4. 実行後に同日重複行と欠損行が自動で削除されること（ログに `整形:` が表示されます）
+4. 実行後に同日重複行・欠損行・LP 9000未満の行が自動で削除されること（ログに `整形:` が表示されます）
 
 途中で止まっても、保存済み分はCSVに反映済みです。再実行すると残りだけ処理されます。
 
@@ -304,7 +300,23 @@ $env:BUCKLER_COOKIE = "cookie1=value1; cookie2=value2"
 & "c:/Users/hyuni/OneDrive/ドキュメント/GitHub/Code/.venv/Scripts/python.exe" scrape_rankings.py --ranking-type master --start-page 1 --end-page 1
 ```
 
+## 分析ダッシュボード（Streamlit）
+
+サンプル数、分析根拠（相関上位）、総括文ドラフトを1画面で確認できます。
+
+```powershell
+cd "c:\Users\hyuni\OneDrive\ドキュメント\GitHub\Code\sf6-data-inport"
+& "c:/Users/hyuni/OneDrive/ドキュメント/GitHub/Code/.venv/Scripts/python.exe" -m streamlit run dashboard.py
+```
+
+初回のみ、次の追加パッケージをインストールしてください。
+
+```powershell
+& "c:/Users/hyuni/OneDrive/ドキュメント/GitHub/Code/.venv/Scripts/pip.exe" install streamlit plotly pandas
+```
+
 ## 動作環境
 
 - Python 3.13+
-- 標準ライブラリのみ（追加パッケージ不要）
+- 基本機能（収集・整形・要因分析）は標準ライブラリのみ
+- ダッシュボード機能は `streamlit`, `plotly`, `pandas` が必要

@@ -35,7 +35,8 @@ DEFAULT_RANKING_TYPE = "master"
 DEFAULT_START_PAGE   = 1
 DEFAULT_END_PAGE     = 3
 DEFAULT_DELAY        = 1.5
-MIN_PAGE_STEP        = 10000
+MIN_PAGE_STEP        = 1000
+MIN_ALLOWED_LP       = 9000
 DATA_START_ROW_INDEX = 4   # 行 0〜3 はヘッダ
 
 # ランキング flatten 後の列名
@@ -161,27 +162,26 @@ def _has_missing_stats(row: list[str]) -> bool:
     return any(not row[idx].strip() for idx in range(6, 40))
 
 
+def _parse_int_field(value: str) -> int | None:
+    try:
+        return int(value.strip().replace(",", ""))
+    except (ValueError, AttributeError):
+        return None
+
+
 def _row_quality(row: list[str]) -> tuple[int, int, int]:
     """重複行でどちらを残すかの優先度（高いほど優先）。"""
     filled = sum(1 for idx in range(6, 40) if idx < len(row) and row[idx].strip())
 
-    lp = -1
-    try:
-        lp = int(row[3].replace(",", ""))
-    except (ValueError, IndexError, AttributeError):
-        pass
+    lp = _parse_int_field(row[3]) if len(row) > 3 else None
 
-    mr = -1
-    try:
-        mr = int(row[5].replace(",", ""))
-    except (ValueError, IndexError, AttributeError):
-        pass
+    mr = _parse_int_field(row[5]) if len(row) > 5 else None
 
-    return (filled, lp, mr)
+    return (filled, lp if lp is not None else -1, mr if mr is not None else -1)
 
 
-def _cleanup_output_csv(output_path: Path) -> tuple[int, int]:
-    """同日重複と欠損行を除去し、必要ならCSVを書き直す。戻り値: (欠損削除件数, 重複削除件数)"""
+def _cleanup_output_csv(output_path: Path) -> tuple[int, int, int]:
+    """同日重複・欠損・低LP行を除去し、必要ならCSVを書き直す。"""
     all_rows, encoding = _read_all_rows(output_path)
     header_rows = all_rows[:DATA_START_ROW_INDEX]
     data_rows = all_rows[DATA_START_ROW_INDEX:]
@@ -189,6 +189,7 @@ def _cleanup_output_csv(output_path: Path) -> tuple[int, int]:
     cleaned_rows: list[list[str]] = []
     seen_same_day: dict[tuple[str, str], int] = {}
     removed_missing = 0
+    removed_low_lp = 0
     removed_duplicate = 0
 
     for source_row in data_rows:
@@ -198,6 +199,11 @@ def _cleanup_output_csv(output_path: Path) -> tuple[int, int]:
 
         if _has_missing_stats(row):
             removed_missing += 1
+            continue
+
+        lp = _parse_int_field(row[3]) if len(row) > 3 else None
+        if lp is None or lp < MIN_ALLOWED_LP:
+            removed_low_lp += 1
             continue
 
         date = row[1].strip() if len(row) > 1 else ""
@@ -219,11 +225,16 @@ def _cleanup_output_csv(output_path: Path) -> tuple[int, int]:
     for idx, row in enumerate(cleaned_rows, start=1):
         row[0] = str(idx)
 
-    changed = (removed_missing > 0) or (removed_duplicate > 0) or (len(cleaned_rows) != len(data_rows))
+    changed = (
+        (removed_missing > 0)
+        or (removed_low_lp > 0)
+        or (removed_duplicate > 0)
+        or (len(cleaned_rows) != len(data_rows))
+    )
     if changed:
         _rewrite_csv(output_path, header_rows + cleaned_rows, encoding)
 
-    return removed_missing, removed_duplicate
+    return removed_missing, removed_low_lp, removed_duplicate
 
 
 # ---------------------------------------------------------------------------
@@ -290,8 +301,9 @@ def _fetch_ranking_entries(
             player   = flat.get(_COL_PLAYER, "").strip()
             lp       = flat.get(_COL_LP, "").strip().replace(",", "")
             mr       = flat.get(_COL_MR, "").strip().replace(",", "")
-            if short_id and player and lp:
-                entries.append({"short_id": short_id, "player": player, "lp": lp, "mr": mr or "0"})
+            lp_value = _parse_int_field(lp)
+            if short_id and player and lp_value is not None and lp_value >= MIN_ALLOWED_LP:
+                entries.append({"short_id": short_id, "player": player, "lp": str(lp_value), "mr": mr or "0"})
 
         if idx < len(pages) - 1:
             time.sleep(delay)
@@ -480,9 +492,11 @@ def collect(
         return
 
     if not to_update and not to_insert:
-        removed_missing, removed_duplicate = _cleanup_output_csv(output_path)
+        removed_missing, removed_low_lp, removed_duplicate = _cleanup_output_csv(output_path)
         print("処理対象がないため終了します。")
-        print(f"整形: 同日重複削除={removed_duplicate}  欠損行削除={removed_missing}")
+        print(
+            f"整形: 同日重複削除={removed_duplicate}  欠損行削除={removed_missing}  LP{MIN_ALLOWED_LP}未満削除={removed_low_lp}"
+        )
         print(f"出力: {output_path}")
         return
 
@@ -537,11 +551,13 @@ def collect(
         if counter < total:
             time.sleep(delay)
 
-    removed_missing, removed_duplicate = _cleanup_output_csv(output_path)
+    removed_missing, removed_low_lp, removed_duplicate = _cleanup_output_csv(output_path)
 
     print()
     print(f"完了: 更新={updated_count}  新規追加={inserted_count}  エラー={error_count}  スキップ={skip_count}")
-    print(f"整形: 同日重複削除={removed_duplicate}  欠損行削除={removed_missing}")
+    print(
+        f"整形: 同日重複削除={removed_duplicate}  欠損行削除={removed_missing}  LP{MIN_ALLOWED_LP}未満削除={removed_low_lp}"
+    )
     print(f"出力: {output_path}")
 
 
