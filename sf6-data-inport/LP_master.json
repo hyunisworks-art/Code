@@ -1,0 +1,45 @@
+[
+  {"rank":"MASTER","star":null,"min_lp":25000,"max_lp":null},
+
+  {"rank":"DIAMOND","star":5,"min_lp":23800,"max_lp":25000},
+  {"rank":"DIAMOND","star":4,"min_lp":22600,"max_lp":23800},
+  {"rank":"DIAMOND","star":3,"min_lp":21400,"max_lp":22600},
+  {"rank":"DIAMOND","star":2,"min_lp":20200,"max_lp":21400},
+  {"rank":"DIAMOND","star":1,"min_lp":19000,"max_lp":20200},
+
+  {"rank":"PLATINUM","star":5,"min_lp":17800,"max_lp":19000},
+  {"rank":"PLATINUM","star":4,"min_lp":16600,"max_lp":17800},
+  {"rank":"PLATINUM","star":3,"min_lp":15400,"max_lp":16600},
+  {"rank":"PLATINUM","star":2,"min_lp":14200,"max_lp":15400},
+  {"rank":"PLATINUM","star":1,"min_lp":13000,"max_lp":14200},
+
+  {"rank":"GOLD","star":5,"min_lp":12200,"max_lp":13000},
+  {"rank":"GOLD","star":4,"min_lp":11800,"max_lp":12200},
+  {"rank":"GOLD","star":3,"min_lp":11400,"max_lp":11800},
+  {"rank":"GOLD","star":2,"min_lp":9800,"max_lp":11400},
+  {"rank":"GOLD","star":1,"min_lp":9000,"max_lp":9800},
+
+  {"rank":"SILVER","star":5,"min_lp":8200,"max_lp":9000},
+  {"rank":"SILVER","star":4,"min_lp":7400,"max_lp":8200},
+  {"rank":"SILVER","star":3,"min_lp":6600,"max_lp":7400},
+  {"rank":"SILVER","star":2,"min_lp":5800,"max_lp":6600},
+  {"rank":"SILVER","star":1,"min_lp":5000,"max_lp":5800},
+
+  {"rank":"BRONZE","star":5,"min_lp":4600,"max_lp":5000},
+  {"rank":"BRONZE","star":4,"min_lp":4200,"max_lp":4600},
+  {"rank":"BRONZE","star":3,"min_lp":3800,"max_lp":4200},
+  {"rank":"BRONZE","star":2,"min_lp":3400,"max_lp":3800},
+  {"rank":"BRONZE","star":1,"min_lp":3000,"max_lp":3400},
+
+  {"rank":"IRON","star":5,"min_lp":2600,"max_lp":3000},
+  {"rank":"IRON","star":4,"min_lp":2200,"max_lp":2600},
+  {"rank":"IRON","star":3,"min_lp":1800,"max_lp":2200},
+  {"rank":"IRON","star":2,"min_lp":1400,"max_lp":1800},
+  {"rank":"IRON","star":1,"min_lp":1000,"max_lp":1400},
+
+  {"rank":"ROOKIE","star":5,"min_lp":800,"max_lp":1000},
+  {"rank":"ROOKIE","star":4,"min_lp":600,"max_lp":800},
+  {"rank":"ROOKIE","star":3,"min_lp":400,"max_lp":600},
+  {"rank":"ROOKIE","star":2,"min_lp":200,"max_lp":400},
+  {"rank":"ROOKIE","star":1,"min_lp":0,"max_lp":200}
+]

@@ -1,0 +1,34 @@
+[
+  {
+    "rank_name": "MASTER",
+    "abbr": "MASTER",
+    "lp_min": 25000,
+    "lp_max": null,
+    "mr_min": null,
+    "mr_max": 1599
+  },
+  {
+    "rank_name": "HIGH MASTER",
+    "abbr": "HIGH",
+    "lp_min": 25000,
+    "lp_max": null,
+    "mr_min": 1600,
+    "mr_max": 1699
+  },
+  {
+    "rank_name": "GRAND MASTER",
+    "abbr": "GRAND",
+    "lp_min": 25000,
+    "lp_max": null,
+    "mr_min": 1700,
+    "mr_max": 1799
+  },
+  {
+    "rank_name": "ULTIMATE MASTER",
+    "abbr": "ULTIMATE",
+    "lp_min": 25000,
+    "lp_max": null,
+    "mr_min": 1800,
+    "mr_max": null
+  }
+]
