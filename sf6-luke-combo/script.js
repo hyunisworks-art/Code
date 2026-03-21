@@ -6,6 +6,14 @@
 // 注意: index.htmlのIDに依存するグローバルスコープ
 
 // ==========================================================
+// Supabase接続設定
+// ==========================================================
+
+const SUPABASE_URL = 'https://kctyakepitpfvtrpsnut.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_-toqPQ-hYYayFrUh8nLvxg_9Lnc3i3z';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ==========================================================
 // 設定読み込み
 // ==========================================================
 
@@ -117,18 +125,69 @@ function nextComboCode() {
   }
 }
 
-// 読み込み
-function loadCombosFromLocal() {
+// 読み込み（Supabaseから、失敗時はlocalStorageにフォールバック）
+async function loadCombosFromLocal() {
   try {
-    const raw = localStorage.getItem(LS_COMBOS_KEY);
-    savedCombos = raw ? JSON.parse(raw) : [];
-    // ★既存コンボのドライブゲージを再計算（コンボパーツ対応のため）
+    const { data, error } = await supabaseClient.from('combos').select('*').order('created_at', { ascending: true });
+    if (error) throw error;
+    savedCombos = data.map(row => ({
+      id: row.id,
+      title: row.title,
+      damage: row.damage ?? '',
+      sa1Damage: row.sa1_damage ?? '',
+      sa2Damage: row.sa2_damage ?? '',
+      sa3Damage: row.sa3_damage ?? '',
+      driveGauge: row.drive_gauge ?? 0,
+      favorite: row.favorite ?? false,
+      combo: row.combo ?? '',
+      memo: row.memo ?? '',
+      createdAt: row.created_at ?? '',
+      updatedAt: row.updated_at ?? '',
+    }));
     savedCombos.forEach(combo => {
       combo.driveGauge = calculateDriveGauge(combo.combo);
     });
   } catch (e) {
-    savedCombos = [];
+    console.error('Supabase読み込みエラー、localStorageにフォールバック:', e);
+    try {
+      const raw = localStorage.getItem(LS_COMBOS_KEY);
+      savedCombos = raw ? JSON.parse(raw) : [];
+      savedCombos.forEach(combo => {
+        combo.driveGauge = calculateDriveGauge(combo.combo);
+      });
+    } catch (e2) {
+      savedCombos = [];
+    }
   }
+}
+
+// ==========================================================
+// Supabase CRUD
+// ==========================================================
+
+// 1件保存/更新（upsert）
+async function upsertComboToSupabase(combo) {
+  const { error } = await supabaseClient.from('combos').upsert({
+    id: combo.id,
+    title: combo.title,
+    damage: combo.damage ?? '',
+    sa1_damage: combo.sa1Damage ?? '',
+    sa2_damage: combo.sa2Damage ?? '',
+    sa3_damage: combo.sa3Damage ?? '',
+    drive_gauge: combo.driveGauge ?? 0,
+    favorite: combo.favorite ?? false,
+    combo: combo.combo ?? '',
+    memo: combo.memo ?? '',
+    created_at: combo.createdAt,
+    updated_at: combo.updatedAt,
+  });
+  if (error) console.error('Supabase upsertエラー:', error);
+}
+
+// 1件削除
+async function deleteComboFromSupabase(id) {
+  const { error } = await supabaseClient.from('combos').delete().eq('id', id);
+  if (error) console.error('Supabase deleteエラー:', error);
 }
 
 // ==========================================================
@@ -479,6 +538,7 @@ function toggleFavorite(id) {
   target.updatedAt = formatDate();
 
   saveCombosToLocal();
+  upsertComboToSupabase(target);
   renderComboList();
 }
 
@@ -595,6 +655,7 @@ function updateSavedCombo(id, newTitle, newCombo, newMemo, newDamage, newSa1Dama
   alert('更新しました');
   renderComboList();
   saveCombosToLocal();
+  upsertComboToSupabase(target);
 }
 
 // ID重複を除去する（最新のupdatedAtを持つものを残す）
@@ -638,6 +699,7 @@ function deleteSavedCombo(id) {
   savedCombos = savedCombos.filter(x => x.id !== id);
   renderComboList();
   saveCombosToLocal();
+  deleteComboFromSupabase(id);
 }
 
 // ダメージ正規化（数字以外除去）
@@ -1282,7 +1344,7 @@ function saveCurrentCombo() {
   const nowFormatted = formatDate();
   const driveGauge = calculateDriveGauge(combo); // ★ドライブゲージを計算
 
-  savedCombos.push({
+  const newCombo = {
     id: generateID(),
     title,
     combo,
@@ -1295,10 +1357,12 @@ function saveCurrentCombo() {
     favorite: false,
     createdAt: nowFormatted,
     updatedAt: nowFormatted
-  });
+  };
+  savedCombos.push(newCombo);
 
   renderComboList();
   saveCombosToLocal();
+  upsertComboToSupabase(newCombo);
 
   // 保存後にエディタ内容＆コード表示をクリア
   clearOutput();
@@ -1502,7 +1566,7 @@ async function init() {
   loadConfigFromLocalStorage();
   renderComboParts();
 
-  loadCombosFromLocal();
+  await loadCombosFromLocal();
   renderComboList();
 
   const screenPositionFilterSel = document.getElementById('screenPositionFilter');
@@ -1723,6 +1787,7 @@ async function importJson() {
         combo.driveGauge = calculateDriveGauge(combo.combo);
       });
       saveCombosToLocal();
+      savedCombos.forEach(c => upsertComboToSupabase(c));
       renderComboList();
       alert('JSONファイルからコンボを読み込みました');
     } else {
