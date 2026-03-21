@@ -68,6 +68,12 @@ const sa1DamageBox = document.getElementById('sa1Damage');
 const sa2DamageBox = document.getElementById('sa2Damage');
 const sa3DamageBox = document.getElementById('sa3Damage');
 const outputCodeEl = document.getElementById('outputCode');
+const authEmailInput = document.getElementById('authEmail');
+const authPasswordInput = document.getElementById('authPassword');
+const signUpBtn = document.getElementById('signUpBtn');
+const signInBtn = document.getElementById('signInBtn');
+const signOutBtn = document.getElementById('signOutBtn');
+const authStatusEl = document.getElementById('authStatus');
 
 // 設定値（config.jsonから初期化）
 let LS_COMBOS_KEY, LS_CODE_COUNTER_KEY, LS_DAMAGE_KEY, LS_SA1_DAMAGE_KEY, LS_SA2_DAMAGE_KEY, LS_SA3_DAMAGE_KEY;
@@ -83,6 +89,107 @@ let history = [];
 let lastWasDirection = false;
 let savedCombos = [];
 let isUpdatingOutputBox = false; // プログラム的なoutputBox更新時のイベント制御用
+let currentUser = null;
+
+// ==========================================================
+// 認証（Supabase Auth）
+// ==========================================================
+
+function setAuthStatus(message, isError = false) {
+  if (!authStatusEl) return;
+  authStatusEl.textContent = message;
+  authStatusEl.style.color = isError ? '#b00020' : '#444';
+}
+
+function updateAuthUiState() {
+  const loggedIn = !!currentUser;
+
+  if (authEmailInput) authEmailInput.disabled = loggedIn;
+  if (authPasswordInput) authPasswordInput.disabled = loggedIn;
+  if (signUpBtn) signUpBtn.disabled = loggedIn;
+  if (signInBtn) signInBtn.disabled = loggedIn;
+  if (signOutBtn) signOutBtn.disabled = !loggedIn;
+
+  if (loggedIn) {
+    const email = currentUser.email || 'ログイン済み';
+    setAuthStatus(`ログイン中: ${email}`);
+  } else {
+    setAuthStatus('未ログイン');
+  }
+}
+
+function getAuthCredentials() {
+  const email = authEmailInput ? authEmailInput.value.trim() : '';
+  const password = authPasswordInput ? authPasswordInput.value : '';
+  if (!email || !password) {
+    alert('メールアドレスとパスワードを入力してください');
+    return null;
+  }
+  return { email, password };
+}
+
+async function initAuth() {
+  const { data, error } = await supabaseClient.auth.getSession();
+  if (error) {
+    console.error('セッション取得エラー:', error);
+    setAuthStatus('認証初期化エラー', true);
+  }
+  currentUser = data?.session?.user ?? null;
+  updateAuthUiState();
+
+  supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+    currentUser = session?.user ?? null;
+    updateAuthUiState();
+    await loadCombosFromLocal();
+    renderComboList();
+  });
+}
+
+async function signUpWithEmail() {
+  const creds = getAuthCredentials();
+  if (!creds) return;
+
+  const { error } = await supabaseClient.auth.signUp({
+    email: creds.email,
+    password: creds.password,
+  });
+
+  if (error) {
+    setAuthStatus(`新規登録失敗: ${error.message}`, true);
+    return;
+  }
+
+  setAuthStatus('新規登録しました。メール確認が必要な場合があります。');
+}
+
+async function signInWithEmail() {
+  const creds = getAuthCredentials();
+  if (!creds) return;
+
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email: creds.email,
+    password: creds.password,
+  });
+
+  if (error) {
+    setAuthStatus(`ログイン失敗: ${error.message}`, true);
+    return;
+  }
+
+  if (authPasswordInput) authPasswordInput.value = '';
+  setAuthStatus('ログインしました');
+}
+
+async function signOutCurrentUser() {
+  const { error } = await supabaseClient.auth.signOut();
+  if (error) {
+    setAuthStatus(`ログアウト失敗: ${error.message}`, true);
+    return;
+  }
+  savedCombos = [];
+  renderComboList();
+  setAuthStatus('ログアウトしました');
+}
 
 // ==========================================================
 // localStorage永続化
@@ -127,8 +234,17 @@ function nextComboCode() {
 
 // 読み込み（Supabaseから、失敗時はlocalStorageにフォールバック）
 async function loadCombosFromLocal() {
+  if (!currentUser) {
+    savedCombos = [];
+    return;
+  }
+
   try {
-    const { data, error } = await supabaseClient.from('combos').select('*').order('created_at', { ascending: true });
+    const { data, error } = await supabaseClient
+      .from('combos')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: true });
     if (error) throw error;
     savedCombos = data.map(row => ({
       id: row.id,
@@ -148,16 +264,9 @@ async function loadCombosFromLocal() {
       combo.driveGauge = calculateDriveGauge(combo.combo);
     });
   } catch (e) {
-    console.error('Supabase読み込みエラー、localStorageにフォールバック:', e);
-    try {
-      const raw = localStorage.getItem(LS_COMBOS_KEY);
-      savedCombos = raw ? JSON.parse(raw) : [];
-      savedCombos.forEach(combo => {
-        combo.driveGauge = calculateDriveGauge(combo.combo);
-      });
-    } catch (e2) {
-      savedCombos = [];
-    }
+    console.error('Supabase読み込みエラー:', e);
+    savedCombos = [];
+    setAuthStatus('読み込み失敗。DBのuser_id設定を確認してください', true);
   }
 }
 
@@ -167,8 +276,14 @@ async function loadCombosFromLocal() {
 
 // 1件保存/更新（upsert）
 async function upsertComboToSupabase(combo) {
+  if (!currentUser) {
+    setAuthStatus('ログインしてから保存してください', true);
+    return;
+  }
+
   const { error } = await supabaseClient.from('combos').upsert({
     id: combo.id,
+    user_id: currentUser.id,
     title: combo.title,
     damage: combo.damage ?? '',
     sa1_damage: combo.sa1Damage ?? '',
@@ -186,7 +301,12 @@ async function upsertComboToSupabase(combo) {
 
 // 1件削除
 async function deleteComboFromSupabase(id) {
-  const { error } = await supabaseClient.from('combos').delete().eq('id', id);
+  if (!currentUser) return;
+  const { error } = await supabaseClient
+    .from('combos')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', currentUser.id);
   if (error) console.error('Supabase deleteエラー:', error);
 }
 
@@ -1527,6 +1647,7 @@ function initCollapsibles() {
 async function init() {
   // config.jsonを読み込み
   await loadConfig();
+  await initAuth();
   
   // 設定値を初期化
   LS_COMBOS_KEY = config.localStorage.combosKey;
@@ -1674,6 +1795,10 @@ async function init() {
 
 window.addEventListener('DOMContentLoaded', () => {
   init();
+
+  if (signUpBtn) signUpBtn.addEventListener('click', signUpWithEmail);
+  if (signInBtn) signInBtn.addEventListener('click', signInWithEmail);
+  if (signOutBtn) signOutBtn.addEventListener('click', signOutCurrentUser);
   
   // コントロールボタンのイベントバインド
   const copyBtn = document.getElementById('copyBtn');

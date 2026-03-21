@@ -74,6 +74,37 @@ button:hover {
   box-sizing: border-box;
 }
 
+.auth-bar {
+  max-width: 1200px;
+  margin: 0 auto 12px auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 15px 0 0;
+  box-sizing: border-box;
+}
+
+.auth-input {
+  width: 220px;
+  padding: 5px 8px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  font-size: 13px;
+  background: #fafafa;
+}
+
+.auth-status {
+  margin-left: auto;
+  font-size: 12px;
+  color: #444;
+  white-space: nowrap;
+}
+
+.auth-btn {
+  width: auto;
+  min-width: 74px;
+}
+
 .header-left {
   display: flex;
   align-items: center;
@@ -871,6 +902,22 @@ button.fav.on:hover {
     flex: 1 1 100%;
     padding: 0;
     justify-content: center;
+  }
+
+  .auth-bar {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .auth-input {
+    width: min(100%, 280px);
+  }
+
+  .auth-status {
+    margin-left: 0;
+    width: 100%;
+    text-align: center;
   }
 
   .row,
