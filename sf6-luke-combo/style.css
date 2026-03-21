@@ -105,6 +105,28 @@ button:hover {
   min-width: 74px;
 }
 
+.auth-gate {
+  max-width: 1200px;
+  margin: 0 auto 16px auto;
+  padding: 18px;
+  border: 1px solid #888;
+  border-radius: 10px;
+  background: #f7f7f7;
+  box-sizing: border-box;
+}
+
+.auth-gate-title {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  text-align: left;
+}
+
+.auth-gate-text {
+  margin: 0;
+  color: #444;
+  line-height: 1.5;
+}
+
 .header-left {
   display: flex;
   align-items: center;
@@ -918,6 +940,10 @@ button.fav.on:hover {
     margin-left: 0;
     width: 100%;
     text-align: center;
+  }
+
+  .auth-gate {
+    padding: 14px;
   }
 
   .row,

@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+git -C "c:\Users\hyuni\OneDrive\ドキュメント\GitHub\Code" add sf6-luke-combo/index.html sf6-luke-combo/style.css sf6-luke-combo/script.js
+git -C "c:\Users\hyuni\OneDrive\ドキュメント\GitHub\Code" commit -m "Hide app until user signs in"
+git -C "c:\Users\hyuni\OneDrive\ドキュメント\GitHub\Code" push origin main<!DOCTYPE html>
 <!--
   index.html: スト6 コンボ入力ツールの単一ページHTML。
   - 依存: `script.js` がグローバルIDに依存するため、要素IDを変更する場合は必ず `script.js` を更新すること。
@@ -15,7 +17,7 @@
   </head>
     <body>
       <!-- ヘッダー -->
-      <div class="header">
+      <div id="appHeader" class="header hidden">
         <div class="header-left">
           <h1>スト6 コンボ入力ツール</h1>
           <button id="helpBtn" class="tiny-button">使い方</button>
@@ -35,8 +37,12 @@
         <button id="signOutBtn" class="tiny-button auth-btn">ログアウト</button>
         <span id="authStatus" class="auth-status">未ログイン</span>
       </div>
+      <div id="authGate" class="auth-gate">
+        <h2 class="auth-gate-title">ログインしてください</h2>
+        <p class="auth-gate-text">コンボ一覧の表示・保存・更新・削除はログイン後に利用できます。</p>
+      </div>
       <!-- メイン -->
-      <div class="container">
+      <div id="appContainer" class="container hidden">
         <!-- 左カラム -->
         <div class="panel">
           <div class="mode-toggle-container">

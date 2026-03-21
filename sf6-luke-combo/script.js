@@ -74,6 +74,9 @@ const signUpBtn = document.getElementById('signUpBtn');
 const signInBtn = document.getElementById('signInBtn');
 const signOutBtn = document.getElementById('signOutBtn');
 const authStatusEl = document.getElementById('authStatus');
+const authGateEl = document.getElementById('authGate');
+const appHeaderEl = document.getElementById('appHeader');
+const appContainerEl = document.getElementById('appContainer');
 
 // 設定値（config.jsonから初期化）
 let LS_COMBOS_KEY, LS_CODE_COUNTER_KEY, LS_DAMAGE_KEY, LS_SA1_DAMAGE_KEY, LS_SA2_DAMAGE_KEY, LS_SA3_DAMAGE_KEY;
@@ -109,6 +112,10 @@ function updateAuthUiState() {
   if (signUpBtn) signUpBtn.disabled = loggedIn;
   if (signInBtn) signInBtn.disabled = loggedIn;
   if (signOutBtn) signOutBtn.disabled = !loggedIn;
+
+  if (authGateEl) authGateEl.classList.toggle('hidden', loggedIn);
+  if (appHeaderEl) appHeaderEl.classList.toggle('hidden', !loggedIn);
+  if (appContainerEl) appContainerEl.classList.toggle('hidden', !loggedIn);
 
   if (loggedIn) {
     const email = currentUser.email || 'ログイン済み';
