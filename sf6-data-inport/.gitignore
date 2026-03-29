@@ -1,0 +1,17 @@
+# 収集データ（個人情報・サンプルデータを含むため除外）
+data/
+
+# Buckler Cookieファイル
+.buckler_cookie.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# 一時ファイル
+*.tmp
+tmp_*.html

@@ -113,15 +113,22 @@ def get_build_id(html: str) -> str:
     return build_id
 
 
-def build_ranking_page_url(ranking_type: str, page: int, locale: str) -> str:
+def build_ranking_page_url(ranking_type: str, page: int, locale: str, league_rank: int = 0) -> str:
+    params: dict[str, Any] = {"page": page}
+    if league_rank:
+        params["league_rank"] = league_rank
+    query = urlencode(params)
     if locale == DEFAULT_LOCALE:
-        return f"{BASE_URL}/ranking/{ranking_type}?page={page}"
-    return f"{BASE_URL}/{locale}/ranking/{ranking_type}?page={page}"
+        return f"{BASE_URL}/ranking/{ranking_type}?{query}"
+    return f"{BASE_URL}/{locale}/ranking/{ranking_type}?{query}"
 
 
-def build_next_data_url(build_id: str, ranking_type: str, page: int, locale: str) -> str:
-    params = urlencode({"page": page})
-    return f"{BASE_URL}/_next/data/{build_id}/{locale}/ranking/{ranking_type}.json?{params}"
+def build_next_data_url(build_id: str, ranking_type: str, page: int, locale: str, league_rank: int = 0) -> str:
+    params: dict[str, Any] = {"page": page}
+    if league_rank:
+        params["league_rank"] = league_rank
+    query = urlencode(params)
+    return f"{BASE_URL}/_next/data/{build_id}/{locale}/ranking/{ranking_type}.json?{query}"
 
 
 def get_ranking_payload(page_props: dict[str, Any], ranking_type: str) -> dict[str, Any]:
