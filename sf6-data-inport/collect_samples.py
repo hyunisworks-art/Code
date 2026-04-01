@@ -88,18 +88,22 @@ def _fetch_short_ids_for_rank(
     timeout: int,
     delay: float,
     request_counter: list[int],
+    exclude_ids: set[str] | None = None,
 ) -> list[str]:
-    """指定ランク帯のランキングからshort_idを最大count件収集する。"""
+    """指定ランク帯のランキングからshort_idを最大count件収集する。
+    exclude_ids に含まれるIDはスキップし、count件の新規IDを集める。"""
     config = RANK_CONFIG[rank_key]
     ranking_type = config["ranking_type"]
     # league_rank の範囲（各ランク帯のサブランク最小〜最大）
     league_rank_min: int = config["league_rank_min"]
     league_rank_max: int = config["league_rank_max"]
 
+    _exclude = exclude_ids or set()
     short_ids: list[str] = []
+    seen: set[str] = set()  # セッション内重複防止
 
-    # ランキング1ページあたり大体20件。必要ページ数を概算
-    pages_per_sub_rank = max(1, (count // 20) + 1)
+    # 既存IDを除いてcount件集めるため、ページ数を多めに確保
+    pages_per_sub_rank = max(3, (count // 10) + 2)
 
     # 最初のページでbuild_idを取得（league_rank パラメータなしで取得）
     first_url = _ranking.build_ranking_page_url(ranking_type, 1, _ranking.DEFAULT_LOCALE)
@@ -171,8 +175,14 @@ def _fetch_short_ids_for_rank(
 
                 if not short_id:
                     continue
+                if short_id in _exclude or short_id in seen:
+                    continue
 
+                seen.add(short_id)
                 short_ids.append(short_id)
+
+            if not ranking_items:
+                break  # ページが空なら次のサブランクへ
 
             if page < pages_per_sub_rank:
                 time.sleep(delay)
@@ -224,16 +234,17 @@ def _fetch_play_data_with_retry(
 # JSON 操作
 # ---------------------------------------------------------------------------
 
-def _load_existing_ids(samples_dir: Path, today: str) -> set[str]:
-    """当日すでに保存済みのplayer_idセットを返す（YYYY-MM-DD_<id>.json の id 部分）。"""
+def _load_existing_ids(samples_dir: Path, today: str = "") -> set[str]:
+    """保存済みのplayer_idセットを返す（全期間対象）。
+    today引数は後方互換のために残すが使用しない。"""
     if not samples_dir.exists():
         return set()
-    prefix = f"{today}_"
-    return {
-        p.stem[len(prefix):]
-        for p in samples_dir.glob(f"{today}_*.json")
-        if p.stem.startswith(prefix)
-    }
+    ids: set[str] = set()
+    for p in samples_dir.glob("????-??-??_*.json"):
+        parts = p.stem.split("_", 1)
+        if len(parts) == 2:
+            ids.add(parts[1])
+    return ids
 
 
 def _save_sample_json(json_path: Path, payload: dict[str, Any]) -> None:
@@ -301,6 +312,7 @@ def collect_samples_for_rank(
         timeout=timeout,
         delay=delay,
         request_counter=request_counter,
+        exclude_ids=existing_ids,
     )
     print(f"  プレイヤーID収集: {len(short_ids)}件")
 
