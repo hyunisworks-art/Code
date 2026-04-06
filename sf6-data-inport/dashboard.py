@@ -552,9 +552,13 @@ def compute_feature_gap_table(
 
         direction = 1.0 if corr > 0 else -1.0
         gap_z = direction * (target_median - float(player_value)) / target_std
-        # shortage_score: gap_z に相関の強さを掛けた優先度スコア
-        # gap_z > 0 = 不足、abs(corr) = その指標が LP/MR とどれだけ関係するか
         shortage_score = gap_z * abs(corr)
+
+        # 上位何%：「上位が低いほど優秀」に統一
+        # corr > 0（多いほど良い）: 自分より低い人の割合 = 下位%、上位% = 100 - 下位%
+        # corr < 0（少ないほど良い）: 自分より低い人の割合 = そのまま上位%
+        pct_below = float((series <= float(player_value)).mean() * 100)
+        upper_pct = round(100 - pct_below if corr > 0 else pct_below, 1)
 
         rows.append(
             {
@@ -564,12 +568,13 @@ def compute_feature_gap_table(
                 "correlation": corr,
                 "gap_z": gap_z,
                 "shortage_score": shortage_score,
+                "upper_pct": upper_pct,
                 "n_target": int(len(series)),
             }
         )
 
     if not rows:
-        return pd.DataFrame(columns=["feature", "player", "target_median", "correlation", "gap_z", "shortage_score", "n_target"])
+        return pd.DataFrame(columns=["feature", "player", "target_median", "correlation", "gap_z", "shortage_score", "upper_pct", "n_target"])
     return pd.DataFrame(rows).sort_values("shortage_score", ascending=False)
 
 
@@ -645,14 +650,14 @@ def _show_gap_table(gap_df: pd.DataFrame, top_n: int = 5) -> None:
 
     display_df = gap_df.copy()
     display_df["指標"] = display_df["feature"].astype(str).apply(feature_label)
-    display_df["判定"] = display_df["gap_z"].apply(lambda x: "不足" if x > 0 else "強み")
+    display_df["判定"] = display_df["shortage_score"].apply(lambda x: "不足" if x > 0 else "強み")
     display_df["信頼度"] = display_df["n_target"].apply(confidence_label)
 
     shortage = display_df[display_df["shortage_score"] > 0].sort_values("shortage_score", ascending=False).head(top_n)
     strength = display_df[display_df["shortage_score"] < 0].sort_values("shortage_score", ascending=True).head(top_n)
 
-    table_cols = ["指標", "判定", "player", "target_median", "gap_z", "shortage_score", "信頼度"]
-    rename_map = {"player": "あなた", "target_median": "基準中央値", "gap_z": "差分Z", "shortage_score": "優先度スコア"}
+    table_cols = ["指標", "判定", "player", "target_median", "upper_pct", "信頼度"]
+    rename_map = {"player": "あなた", "target_median": "基準中央値", "upper_pct": "上位（%）"}
 
     # 両テーブル合算で最長ラベルを計算（CJK≈15px・ASCII≈8px・余白24px）
     all_labels = [
@@ -666,15 +671,13 @@ def _show_gap_table(gap_df: pd.DataFrame, top_n: int = 5) -> None:
 
     col_config = {
         "指標": st.column_config.TextColumn(width=label_col_width),
-        # 残り6列は幅未指定 → use_container_width=True で等分
+        # 残り列は幅未指定 → use_container_width=True で等分
     }
 
     def _render(df: pd.DataFrame) -> None:
         t = df[table_cols].rename(columns=rename_map)
         t["あなた"] = t["あなた"].round(2)
         t["基準中央値"] = t["基準中央値"].round(2)
-        t["差分Z"] = t["差分Z"].round(3)
-        t["優先度スコア"] = t["優先度スコア"].round(3)
         st.dataframe(t, use_container_width=True, hide_index=True, column_config=col_config)
 
     st.markdown("**強み上位**")
