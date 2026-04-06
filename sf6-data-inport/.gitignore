@@ -4,6 +4,9 @@ data/
 # Buckler Cookieファイル
 .buckler_cookie.txt
 
+# Streamlit シークレット（本番用キーを含む）
+.streamlit/secrets.toml
+
 # Python
 __pycache__/
 *.py[cod]
