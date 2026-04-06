@@ -1,13 +1,19 @@
 """SF6 Step1分析: 同ランク帯との比較スクリプト
 
-使い方:
-    python analyze_step1.py --player "プレイヤー名"
-    python analyze_step1.py --player "プレイヤー名" --rank PLATINUM
+使い方（JSONモード・推奨）:
+    python analyze_step1.py --player 2202760091
+    python analyze_step1.py --player 2202760091 --rank DIAMOND
+
+使い方（CSVモード・後方互換）:
     python analyze_step1.py --player "プレイヤー名" --input sf6-playlog-out.csv
+
+JSONモードは data/samples/*.json と data/my/*_<short_id>.json を自動検出する。
+--input を明示した場合は常にCSVモードになる。
 """
 from __future__ import annotations
 
 import argparse
+import json
 import math
 import sys
 from pathlib import Path
@@ -34,6 +40,118 @@ RANK_ORDER = [
     "ROOKIE", "IRON", "BRONZE", "SILVER", "GOLD",
     "PLATINUM", "DIAMOND", "MASTER",
 ]
+
+# JSONモードのデフォルトディレクトリ
+_SAMPLES_DIR = Path("data/samples")
+_MY_DIR = Path("data/my")
+
+# JSONのbattle_statsキー → CSVカラム名のマッピング
+# パーセント系フィールド（JSONは0-1小数、出力は"XX.XX%"文字列）
+_PCT_FIELDS: list[tuple[str, str]] = [
+    ("gauge_rate_drive_guard",           "ドライブパリィ"),
+    ("gauge_rate_drive_impact",          "ドライブインパクト"),
+    ("gauge_rate_drive_arts",            "オーバードライブアーツ"),
+    ("gauge_rate_drive_rush_from_parry", "パリィドライブラッシュ"),
+    ("gauge_rate_drive_rush_from_cancel","キャンセルドライブラッシュ"),
+    ("gauge_rate_drive_reversal",        "ドライブリバーサル"),
+    ("gauge_rate_drive_other",           "ダメージ"),
+    ("gauge_rate_sa_lv1",                "Lv1"),
+    ("gauge_rate_sa_lv2",                "Lv2"),
+    ("gauge_rate_sa_lv3",                "Lv3"),
+    ("gauge_rate_ca",                    "CA"),
+]
+# 数値系フィールド（回数・時間・ポイント）
+_NUM_FIELDS: list[tuple[str, str]] = [
+    ("drive_reversal",                       "使用回数"),
+    ("drive_parry",                          "成功回数"),
+    ("throw_drive_parry",                    "相手のドライブパリィを投げた"),
+    ("received_throw_drive_parry",           "自分のドライブパリィを投げられた"),
+    ("just_parry",                           "ジャストパリィ回数"),
+    ("drive_impact",                         "ドライブインパクト_決めた回数"),
+    ("punish_counter",                       "パニッシュカウンターを決めた回数"),
+    ("drive_impact_to_drive_impact",         "相手のドライブインパクトに決めた回数"),
+    ("received_drive_impact",                "ドライブインパクト_受けた回数"),
+    ("received_punish_counter",              "パニッシュカウンターを受けた回数"),
+    ("received_drive_impact_to_drive_impact","相手にドライブインパクトで返された回数"),
+    ("stun",                                 "スタンさせた回数"),
+    ("received_stun",                        "スタンさせられた回数"),
+    ("throw_count",                          "投げ_決めた回数"),
+    ("received_throw_count",                 "投げ_受けた回数"),
+    ("throw_tech",                           "投げ抜け回数"),
+    ("corner_time",                          "相手を追い詰めている時間"),
+    ("cornered_time",                        "相手に追い詰められている時間"),
+    ("rank_match_play_count",                "ランクマッチプレイ回数"),
+    ("casual_match_play_count",              "カジュアルマッチプレイ回数"),
+    ("custom_room_match_play_count",         "ルームマッチプレイ回数"),
+    ("battle_hub_match_play_count",          "バトルハブマッチプレイ回数"),
+    ("total_all_character_play_point",       "累計プレイポイント"),
+]
+
+JSON_FEATURE_NAMES: list[str] = [col for _, col in _PCT_FIELDS + _NUM_FIELDS]
+
+
+def _json_to_row(data: dict[str, Any]) -> dict[str, Any]:
+    """JSON 1件を analyze_step1 が扱える行辞書に変換する。"""
+    li = data.get("league_info") or {}
+    bs = (data.get("play") or {}).get("battle_stats") or {}
+
+    # ランク: サンプルは top-level "rank"（"diamond" 等）、個人データは league_rank_info
+    rank_name: str = (
+        (li.get("league_rank_info") or {}).get("league_rank_name")
+        or data.get("rank")
+        or ""
+    )
+
+    row: dict[str, Any] = {
+        "No": None,
+        "データ取得日": data.get("fetch_date", ""),
+        "プレイヤー名": str(data.get("player_id", "")),
+        "リーグポイント": li.get("league_point"),
+        "ランク": rank_name,
+        "MR": li.get("master_rating") or None,
+    }
+
+    for json_key, col in _PCT_FIELDS:
+        val = bs.get(json_key)
+        row[col] = f"{float(val) * 100:.2f}%" if val is not None else ""
+
+    for json_key, col in _NUM_FIELDS:
+        val = bs.get(json_key)
+        row[col] = str(val) if val is not None else ""
+
+    return row
+
+
+def load_json_rows(
+    short_id: str,
+    samples_dir: Path = _SAMPLES_DIR,
+    my_dir: Path = _MY_DIR,
+) -> tuple[list[str], list[dict[str, Any]], dict[str, Any] | None]:
+    """サンプルJSONと個人JSONを読み込む。
+
+    Returns:
+        (feature_names, sample_rows, player_row_or_None)
+    """
+    sample_rows: list[dict[str, Any]] = []
+    for path in sorted(samples_dir.glob("*.json")):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            sample_rows.append(_json_to_row(data))
+        except Exception:
+            continue
+
+    # 個人データ: *_<short_id>.json の最新ファイル
+    my_files = sorted(my_dir.glob(f"*_{short_id}.json"))
+    player_row: dict[str, Any] | None = None
+    if my_files:
+        try:
+            data = json.loads(my_files[-1].read_text(encoding="utf-8"))
+            player_row = _json_to_row(data)
+            player_row["プレイヤー名"] = short_id  # find_player_rows の検索キーと一致させる
+        except Exception:
+            pass
+
+    return JSON_FEATURE_NAMES, sample_rows, player_row
 
 
 def get_rank_group(rank: str) -> str:
@@ -146,43 +264,75 @@ def print_comparison(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="同ランク帯との指標比較（Step1分析）")
-    parser.add_argument("--player", required=True, help="比較対象のプレイヤー名")
-    parser.add_argument("--input", default="sf6-playlog-out.csv", help="分析対象CSV")
+    parser.add_argument("--player", required=True, help="short_id（JSONモード）またはプレイヤー名（CSVモード）")
+    parser.add_argument("--input", default=None, help="CSVファイルを明示（省略時はJSONモードを自動検出）")
     parser.add_argument("--rank", default=None, help="比較ランク帯（省略時: プレイヤーのランクを使用）")
     args = parser.parse_args()
 
-    input_path = Path(args.input)
-    if not input_path.exists():
-        print(f"エラー: ファイルが見つかりません: {input_path}")
-        return
+    # モード判定: --input 未指定かつ data/samples/ に JSON があれば JSON モード
+    use_json = args.input is None and _SAMPLES_DIR.exists() and any(_SAMPLES_DIR.glob("*.json"))
 
-    columns, rows = load_playlog_rows(input_path)
-    feature_names = get_feature_names(columns)
-    print(f"データ読み込み完了: {len(rows)}件 / 分析項目: {len(feature_names)}項目")
+    if use_json:
+        feature_names, sample_rows, player_row = load_json_rows(args.player)
+        print(f"JSONモード: サンプル {len(sample_rows)} 件 / 分析項目: {len(feature_names)} 項目")
 
-    player_rows = find_player_rows(rows, args.player)
-    if not player_rows:
-        print(f"エラー: プレイヤー '{args.player}' が見つかりません")
-        print("データ内のプレイヤー名（先頭10件）:")
-        for row in rows[:10]:
-            print(f"  - {row.get('プレイヤー名', '')}")
-        return
+        if player_row is None:
+            print(f"エラー: short_id '{args.player}' の個人データが {_MY_DIR}/ に見つかりません")
+            my_files = sorted(_MY_DIR.glob("*.json")) if _MY_DIR.exists() else []
+            if my_files:
+                print("利用可能なファイル（最新5件）:")
+                for f in my_files[-5:]:
+                    print(f"  {f.name}")
+            return
 
-    player_row = player_rows[-1]
-    player_rank = str(player_row.get("ランク", ""))
-    rank_group = args.rank.upper() if args.rank else get_rank_group(player_rank)
+        player_rank = str(player_row.get("ランク", ""))
+        rank_group = args.rank.upper() if args.rank else get_rank_group(player_rank)
 
-    print(f"プレイヤー: {args.player}  ランク: {player_rank}  比較帯: {rank_group}")
+        print(f"プレイヤーID: {args.player}  ランク: {player_rank}  比較帯: {rank_group}")
 
-    rank_rows = [
-        row for row in filter_rows_by_rank(rows, rank_group)
-        if args.player not in str(row.get("プレイヤー名", ""))
-    ]
+        rank_rows = [
+            row for row in filter_rows_by_rank(sample_rows, rank_group)
+            if args.player not in str(row.get("プレイヤー名", ""))
+        ]
 
-    if len(rank_rows) < 30:
-        print(f"警告: {rank_group}帯のデータが少ないです（{len(rank_rows)}件）。精度向上には30件以上推奨。")
+        if len(rank_rows) < 30:
+            print(f"警告: {rank_group}帯のデータが少ないです（{len(rank_rows)}件）。精度向上には30件以上推奨。")
 
-    print_comparison(args.player, player_row, rank_group, rank_rows, feature_names)
+        print_comparison(args.player, player_row, rank_group, rank_rows, feature_names)
+
+    else:
+        csv_path = Path(args.input) if args.input else Path("sf6-playlog-out.csv")
+        if not csv_path.exists():
+            print(f"エラー: ファイルが見つかりません: {csv_path}")
+            return
+
+        columns, rows = load_playlog_rows(csv_path)
+        feature_names = get_feature_names(columns)
+        print(f"データ読み込み完了: {len(rows)}件 / 分析項目: {len(feature_names)}項目")
+
+        player_rows = find_player_rows(rows, args.player)
+        if not player_rows:
+            print(f"エラー: プレイヤー '{args.player}' が見つかりません")
+            print("データ内のプレイヤー名（先頭10件）:")
+            for row in rows[:10]:
+                print(f"  - {row.get('プレイヤー名', '')}")
+            return
+
+        player_row = player_rows[-1]
+        player_rank = str(player_row.get("ランク", ""))
+        rank_group = args.rank.upper() if args.rank else get_rank_group(player_rank)
+
+        print(f"プレイヤー: {args.player}  ランク: {player_rank}  比較帯: {rank_group}")
+
+        rank_rows = [
+            row for row in filter_rows_by_rank(rows, rank_group)
+            if args.player not in str(row.get("プレイヤー名", ""))
+        ]
+
+        if len(rank_rows) < 30:
+            print(f"警告: {rank_group}帯のデータが少ないです（{len(rank_rows)}件）。精度向上には30件以上推奨。")
+
+        print_comparison(args.player, player_row, rank_group, rank_rows, feature_names)
 
 
 if __name__ == "__main__":
