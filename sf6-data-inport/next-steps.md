@@ -21,23 +21,25 @@
 
 ## Priority 2: Decision Metrics
 
-- [ ] Define shortage score formula:
-  - combine gap_z and abs(correlation)
-  - keep scale simple and explainable
-- [ ] Define improvement threshold:
-  - what counts as "improved" week-to-week
-  - what counts as "stable"
-- [ ] Define confidence level:
-  - based on target sample size and variance
+- [x] Define shortage score formula:
+  - shortage_score = gap_z * abs(corr)
+  - sorted by shortage_score (replaces gap_z sort)
+- [x] Define improvement threshold:
+  - IMPROVEMENT_DELTA = 0.20 (shortage_score drop >= 0.20 = "improved")
+  - STABLE_DELTA = 0.05 (change < 0.05 = "stable")
+- [x] Define confidence level:
+  - n >= 60 → 高, n >= 30 → 中, n < 30 → ⚠低
+  - shown as "信頼度" column in shortage table
 
 ## Priority 3: Weekly Tracking
 
-- [ ] Add weekly comparison view for one short_id.
-- [ ] Show trend for top 3 shortage features.
-- [ ] Add weekly action plan output:
-  - keep
-  - improve
-  - watch
+- [x] Add weekly comparison view for one short_id (load_my_history / show_weekly_tracking_section).
+- [x] Show trend for top 3 shortage features (plotly line chart).
+- [x] Add weekly action plan output:
+  - keep (shortage_score <= 0)
+  - improve (delta >= IMPROVEMENT_DELTA)
+  - watch (delta <= -IMPROVEMENT_DELTA)
+  - stable (|delta| < STABLE_DELTA)
 
 ## Notes
 
