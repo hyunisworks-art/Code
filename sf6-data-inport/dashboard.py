@@ -653,14 +653,20 @@ def _show_gap_table(gap_df: pd.DataFrame, top_n: int = 5) -> None:
 
     table_cols = ["指標", "判定", "player", "target_median", "gap_z", "shortage_score", "信頼度"]
     rename_map = {"player": "あなた", "target_median": "基準中央値", "gap_z": "差分Z", "shortage_score": "優先度スコア"}
+
+    # 両テーブル合算で最長ラベルを計算（CJK≈15px・ASCII≈8px・余白24px）
+    all_labels = [
+        feature_label(str(f))
+        for f in pd.concat([strength, shortage])["feature"]
+    ]
+    def _label_px(s: str) -> int:
+        cjk = sum(1 for c in s if ord(c) > 0x2E7F)
+        return cjk * 15 + (len(s) - cjk) * 8 + 24
+    label_col_width = max((_label_px(lbl) for lbl in all_labels), default=200)
+
     col_config = {
-        "指標":     st.column_config.TextColumn(width=220),
-        "判定":     st.column_config.TextColumn(width=60),
-        "あなた":   st.column_config.NumberColumn(width=80),
-        "基準中央値": st.column_config.NumberColumn(width=90),
-        "差分Z":    st.column_config.NumberColumn(width=75),
-        "優先度スコア": st.column_config.NumberColumn(width=95),
-        "信頼度":   st.column_config.TextColumn(width=60),
+        "指標": st.column_config.TextColumn(width=label_col_width),
+        # 残り6列は幅未指定 → use_container_width=True で等分
     }
 
     def _render(df: pd.DataFrame) -> None:
