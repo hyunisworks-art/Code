@@ -1,0 +1,16 @@
+# リポジトリ内はLFに統一。checkout時は各OSがネイティブ改行で展開する
+* text=auto eol=lf
+
+# シェルスクリプトは常にLF
+*.sh text eol=lf
+*.bash text eol=lf
+
+# バイナリ
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.zip binary
+*.xlsx binary
+*.xls binary

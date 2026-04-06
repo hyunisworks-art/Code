@@ -1,0 +1,36 @@
+# Python
+**/.venv/
+**/venv/
+**/env/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Node
+**/node_modules/
+
+# Secrets / Sessions
+**/.buckler_cookie.txt
+**/.streamlit/secrets.toml
+**/secrets.toml
+**/.env
+**/credentials.json
+**/client_secret*.json
+
+# Data (個人情報・サンプル)
+**/data/
+
+# Tmp / Cache
+*.tmp
+tmp_*
+**/.cache/
+**/playwright-report/
+**/.note_session/
+**/.playwright_session/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
