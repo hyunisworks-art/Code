@@ -950,7 +950,7 @@ def show_personal_coaching_section(
         short_id_input = st.text_input(
             "ユーザーコード (short_id)",
             value="",
-            placeholder="例: 2202760091",
+            placeholder="10桁の数字",
             help="BucklerプロフィールURL末尾の数字を入力してください",
         )
     with c2:
@@ -964,7 +964,7 @@ def show_personal_coaching_section(
     # short_id を確定する
     short_id = short_id_input.strip()
     if short_id and not short_id.isdigit():
-        st.warning("ユーザーコードは数字のみで入力してください（例: 2202760091）。BucklerのプロフィールURL末尾の数字を確認してください。")
+        st.warning("ユーザーコードは数字のみで入力してください。BucklerのプロフィールURL末尾の数字を確認してください。")
         return
 
     if not short_id:
@@ -1027,20 +1027,18 @@ def show_personal_coaching_section(
     if not same_rank_df.empty:
         st.caption(f"同ランク帯比較基準: {current_band} の {len(same_rank_df)} 件")
 
-    # --- 同ランク帯との比較（グラフ＋テーブル） ---
+    # --- 同ランク帯との比較（テーブルのみ） ---
     st.subheader("同ランク帯との比較")
     if same_gap_df.empty:
         st.info("同ランク帯のサンプルが不足しているため比較できませんでした。")
     else:
-        _show_gap_bar_chart(same_gap_df, f"同ランク帯（{current_band}）との差")
         _show_gap_table(same_gap_df)
 
-    # --- 目標ランク帯との比較（グラフ＋テーブル） ---
+    # --- 目標ランク帯との比較（テーブルのみ） ---
     st.subheader("目標ランク帯との比較")
     if gap_df.empty:
         st.info("比較可能な指標が不足しているため、個別課題を算出できませんでした。")
     else:
-        _show_gap_bar_chart(gap_df, f"目標ランク帯（{target_rank}）との差")
         _show_gap_table(gap_df)
 
     # --- プレイ時間系 ---
