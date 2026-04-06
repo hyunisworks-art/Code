@@ -654,29 +654,27 @@ def _show_gap_table(gap_df: pd.DataFrame, top_n: int = 5) -> None:
     table_cols = ["指標", "判定", "player", "target_median", "gap_z", "shortage_score", "信頼度"]
     rename_map = {"player": "あなた", "target_median": "基準中央値", "gap_z": "差分Z", "shortage_score": "優先度スコア"}
 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("**不足上位**")
-        if shortage.empty:
-            st.info("不足指標なし")
-        else:
-            t = shortage[table_cols].rename(columns=rename_map)
-            t["あなた"] = t["あなた"].round(2)
-            t["基準中央値"] = t["基準中央値"].round(2)
-            t["差分Z"] = t["差分Z"].round(3)
-            t["優先度スコア"] = t["優先度スコア"].round(3)
-            st.dataframe(t, use_container_width=True, hide_index=True)
-    with col2:
-        st.markdown("**強み上位**")
-        if strength.empty:
-            st.info("強み指標なし")
-        else:
-            t = strength[table_cols].rename(columns=rename_map)
-            t["あなた"] = t["あなた"].round(2)
-            t["基準中央値"] = t["基準中央値"].round(2)
-            t["差分Z"] = t["差分Z"].round(3)
-            t["優先度スコア"] = t["優先度スコア"].round(3)
-            st.dataframe(t, use_container_width=True, hide_index=True)
+    st.markdown("**強み上位**")
+    if strength.empty:
+        st.info("強み指標なし")
+    else:
+        t = strength[table_cols].rename(columns=rename_map)
+        t["あなた"] = t["あなた"].round(2)
+        t["基準中央値"] = t["基準中央値"].round(2)
+        t["差分Z"] = t["差分Z"].round(3)
+        t["優先度スコア"] = t["優先度スコア"].round(3)
+        st.dataframe(t, use_container_width=True, hide_index=True)
+
+    st.markdown("**不足上位**")
+    if shortage.empty:
+        st.info("不足指標なし")
+    else:
+        t = shortage[table_cols].rename(columns=rename_map)
+        t["あなた"] = t["あなた"].round(2)
+        t["基準中央値"] = t["基準中央値"].round(2)
+        t["差分Z"] = t["差分Z"].round(3)
+        t["優先度スコア"] = t["優先度スコア"].round(3)
+        st.dataframe(t, use_container_width=True, hide_index=True)
 
 
 def show_play_volume_table(player_row: dict[str, Any], same_rank_df: pd.DataFrame, target_df: pd.DataFrame) -> None:
