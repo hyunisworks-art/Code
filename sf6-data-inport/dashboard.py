@@ -648,8 +648,8 @@ def _show_gap_table(gap_df: pd.DataFrame, top_n: int = 5) -> None:
     display_df["判定"] = display_df["gap_z"].apply(lambda x: "不足" if x > 0 else "強み")
     display_df["信頼度"] = display_df["n_target"].apply(confidence_label)
 
-    shortage = display_df[display_df["gap_z"] > 0].sort_values("shortage_score", ascending=False).head(top_n)
-    strength = display_df[display_df["gap_z"] <= 0].sort_values("shortage_score", ascending=True).head(top_n)
+    shortage = display_df[display_df["shortage_score"] > 0].sort_values("shortage_score", ascending=False).head(top_n)
+    strength = display_df[display_df["shortage_score"] < 0].sort_values("shortage_score", ascending=True).head(top_n)
 
     table_cols = ["指標", "判定", "player", "target_median", "gap_z", "shortage_score", "信頼度"]
     rename_map = {"player": "あなた", "target_median": "基準中央値", "gap_z": "差分Z", "shortage_score": "優先度スコア"}
