@@ -652,12 +652,17 @@ def _show_gap_table(gap_df: pd.DataFrame, top_n: int = 5) -> None:
     display_df["指標"] = display_df["feature"].astype(str).apply(feature_label)
     display_df["判定"] = display_df["shortage_score"].apply(lambda x: "不足" if x > 0 else "強み")
     display_df["信頼度"] = display_df["n_target"].apply(confidence_label)
+    display_df["順位"] = display_df.apply(
+        lambda r: f"下位{100 - r['upper_pct']:.1f}%" if r["shortage_score"] > 0
+                  else f"上位{r['upper_pct']:.1f}%",
+        axis=1,
+    )
 
     shortage = display_df[display_df["shortage_score"] > 0].sort_values("shortage_score", ascending=False).head(top_n)
     strength = display_df[display_df["shortage_score"] < 0].sort_values("shortage_score", ascending=True).head(top_n)
 
-    table_cols = ["指標", "判定", "player", "target_median", "upper_pct", "信頼度"]
-    rename_map = {"player": "あなた", "target_median": "基準中央値", "upper_pct": "上位（%）"}
+    table_cols = ["指標", "判定", "player", "target_median", "順位", "信頼度"]
+    rename_map = {"player": "あなた", "target_median": "基準中央値"}
 
     # 両テーブル合算で最長ラベルを計算（CJK≈15px・ASCII≈8px・余白24px）
     all_labels = [
@@ -679,6 +684,7 @@ def _show_gap_table(gap_df: pd.DataFrame, top_n: int = 5) -> None:
         t["あなた"] = t["あなた"].round(2)
         t["基準中央値"] = t["基準中央値"].round(2)
         st.dataframe(t, use_container_width=True, hide_index=True, column_config=col_config)
+
 
     st.markdown("**強み上位**")
     if strength.empty:
