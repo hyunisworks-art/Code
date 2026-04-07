@@ -454,8 +454,17 @@ def build_rank_options(df: pd.DataFrame) -> list[str]:
         rank_df.groupby("ランク", dropna=False)["リーグポイント"]
         .median()
         .reset_index(name="lp_median")
-        .sort_values(["lp_median", "ランク"])
     )
+    # マスター帯内の正しい昇順: master < master_high < master_grand < master_master（アルマス）
+    # LP中央値が同程度になるため、セカンダリキーで正しい順序を保証する
+    _MASTER_TIER_ORDER = {
+        "MASTER": 0, "master": 0,
+        "HIGH": 1,   "master_high": 1,
+        "GRAND": 2,  "master_grand": 2,
+        "ULTIMATE": 3, "master_master": 3,
+    }
+    grouped["_master_key"] = grouped["ランク"].map(_MASTER_TIER_ORDER).fillna(-1)
+    grouped = grouped.sort_values(["lp_median", "_master_key", "ランク"])
     return grouped["ランク"].astype(str).tolist()
 
 
@@ -1236,16 +1245,16 @@ def main() -> None:
     st.set_page_config(page_title="SF6 分析ダッシュボード", layout="wide", page_icon="🎮")
     st.title("SF6 分析ダッシュボード")
     st.caption(
-        "本データはBuckler's Boot Camp（CAPCOM）の公開情報をもとに個人が収集・分析したものです。"
+        "本データはBuckler's Boot Camp（CAPCOM）の公開情報をもとに収集・分析したものです。"
         "非公式コンテンツです。CAPCOM社とは一切関係ありません。"
-        "個人利用を目的としています。商用利用・データの二次配布・転載はご遠慮ください。"
+        "個人利用を目的としています。商用利用・データの二次配布・転載はできません。"
     )
 
     with st.sidebar:
         st.header("設定")
         top_n = st.slider("上位表示件数", min_value=3, max_value=12, value=8)
         exclude_char_dependent = st.checkbox("キャラ依存の強い指標を除外", value=True)
-        exclude_play_volume = st.checkbox("プレイ量系指標を除外", value=False)
+        exclude_play_volume = st.checkbox("プレイ量系指標を除外", value=True)
         if st.button("データ再取得", use_container_width=True):
             load_from_supabase.clear()
 
@@ -1377,14 +1386,11 @@ def main() -> None:
         ),
     )
 
-    # ── Section 3: 個別データ診断 ────────────────────────────────────
-    st.divider()
-    show_personal_coaching_section(df, columns, features, lp_results, mr_results)
-
     st.divider()
     st.caption(
-        "本データはBucklers Boot Camp（CAPCOM）の公開情報をもとに個人が収集・分析したものです。"
-        "公式情報・CAPCOM社とは一切関係ありません。個人利用を目的としています。"
+        "本データはBuckler's Boot Camp（CAPCOM）の公開情報をもとに収集・分析したものです。"
+        "非公式コンテンツです。CAPCOM社とは一切関係ありません。"
+        "個人利用を目的としています。商用利用・データの二次配布・転載はできません。"
     )
 
 
