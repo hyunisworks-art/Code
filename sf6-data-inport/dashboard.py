@@ -283,7 +283,7 @@ def _supabase_row_to_dict(row: dict[str, Any]) -> dict[str, Any]:
 def load_from_supabase() -> tuple[list[str], list[dict[str, Any]]]:
     """Supabaseからdata_type=sampleのデータをページネーションで取得する。"""
     if not _SUPABASE_URL or not _SUPABASE_KEY:
-        raise RuntimeError(".env に SUPABASE_URL / SUPABASE_KEY を設定してください")
+        raise RuntimeError("データベース接続設定が見つかりません。管理者にお問い合わせください。")
     client = create_client(_SUPABASE_URL, _SUPABASE_KEY)
     rows_raw: list[dict[str, Any]] = []
     page_size = 50
@@ -812,7 +812,7 @@ def show_weekly_tracking_section(
     """data/my/ の履歴データで週次トレンドと改善ランキングを表示する。"""
     history = load_my_history(short_id)
     if len(history) < 2:
-        st.info(f"週次比較には2件以上の履歴データが必要です（現在 {len(history)} 件）。毎日 fetch_my_data.py を実行してください。")
+        st.info(f"週次比較には2件以上の診断履歴が必要です（現在 {len(history)} 件）。診断を複数回実行すると変化が確認できます。")
         return
 
     # 各日付の gap_df を計算
@@ -995,9 +995,8 @@ def show_personal_coaching_section(
         cookie = sp.load_cookie_text("", sp.DEFAULT_COOKIE_FILE)
         sp.validate_cookie_text(cookie)
         if not cookie:
-            st.error(
-                "個別診断機能は現在ご利用いただけません。"
-                "サーバー設定が必要なため、しばらくお待ちください。"
+            st.info(
+                "個別データ診断は現在準備中です。もうしばらくお待ちください。"
             )
             return
 
@@ -1234,9 +1233,13 @@ def show_factor_section(title: str, results: list[dict[str, Any]], top_n: int, d
 
 
 def main() -> None:
-    st.set_page_config(page_title="SF6 分析ダッシュボード", layout="wide")
+    st.set_page_config(page_title="SF6 分析ダッシュボード", layout="wide", page_icon="🎮")
     st.title("SF6 分析ダッシュボード")
-    st.caption("本ダッシュボードは個人利用を目的としています。商用利用はできません。データの二次配布・転載はご遠慮ください。")
+    st.caption(
+        "本データはBuckler's Boot Camp（CAPCOM）の公開情報をもとに個人が収集・分析したものです。"
+        "非公式コンテンツです。CAPCOM社とは一切関係ありません。"
+        "個人利用を目的としています。商用利用・データの二次配布・転載はご遠慮ください。"
+    )
 
     with st.sidebar:
         st.header("設定")
@@ -1248,8 +1251,10 @@ def main() -> None:
 
     try:
         columns, rows = load_from_supabase()
-    except Exception as exc:
-        st.error(str(exc))
+    except Exception:
+        st.error(
+            "データの読み込みに失敗しました。しばらく経ってから「データ再取得」ボタンをお試しください。"
+        )
         return
 
     if not rows:
@@ -1330,7 +1335,7 @@ def main() -> None:
     if pos_takeaway:
         st.info(f"**{pos_takeaway}**")
     if neg_takeaway:
-        st.error(f"**{neg_takeaway}**")
+        st.warning(f"**{neg_takeaway}**")
     if not pos_takeaway and not neg_takeaway:
         st.info(f"**分析対象 {total} 件。有意な相関は検出されませんでした（サンプル追加を推奨）。**")
     with st.expander("詳細サマリー"):
