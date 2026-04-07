@@ -1084,9 +1084,6 @@ def show_personal_coaching_section(
     st.subheader("ゲージ使用割合")
     show_gauge_pie_charts(player_row, target_df)
 
-    # --- 週次トレンド（Priority 3） ---
-    st.subheader("週次トレンド")
-    show_weekly_tracking_section(short_id, target_df, model_results, coaching_features)
 
 
 def top_positive_negative(results: list[dict[str, Any]], top_n: int) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -1390,6 +1387,10 @@ def main() -> None:
             "【注意】MRはキャラ・マッチング補正が入るため、キャラ依存指標は除外して読むこと。"
         ),
     )
+
+    # ── Section 3: 個別データ診断 ────────────────────────────────────
+    st.divider()
+    show_personal_coaching_section(df, columns, features, lp_results, mr_results)
 
     st.divider()
     st.caption(
