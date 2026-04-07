@@ -239,6 +239,10 @@ def _supabase_row_to_dict(row: dict[str, Any]) -> dict[str, Any]:
         or row.get("rank")
         or ""
     )
+    # 旧値 master_master → 正式名 master_ultimate に正規化
+    # （既存DBデータ・ローカルJSONの後方互換対応）
+    if rank_name == "master_master":
+        rank_name = "master_ultimate"
 
     # LP値がなければrankから推定
     lp = li.get("league_point")
@@ -455,13 +459,14 @@ def build_rank_options(df: pd.DataFrame) -> list[str]:
         .median()
         .reset_index(name="lp_median")
     )
-    # マスター帯内の正しい昇順: master < master_high < master_grand < master_master（アルマス）
+    # マスター帯内の正しい昇順: master < master_high < master_grand < master_ultimate（アルマス）
     # LP中央値が同程度になるため、セカンダリキーで正しい順序を保証する
     _MASTER_TIER_ORDER = {
         "MASTER": 0, "master": 0,
         "HIGH": 1,   "master_high": 1,
         "GRAND": 2,  "master_grand": 2,
-        "ULTIMATE": 3, "master_master": 3,
+        "ULTIMATE": 3, "master_ultimate": 3,
+        "master_master": 3,  # 旧値: 正規化漏れデータへの後方互換
     }
     grouped["_master_key"] = grouped["ランク"].map(_MASTER_TIER_ORDER).fillna(-1)
     grouped = grouped.sort_values(["lp_median", "_master_key", "ランク"])
