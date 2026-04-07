@@ -1311,7 +1311,7 @@ def main() -> None:
             color_continuous_scale="Teal",
         )
         fig_band.add_vline(x=60, line_dash="dash", line_color="orange", annotation_text="最低60")
-        fig_band.add_vline(x=80, line_dash="dot", line_color="green", annotation_text="目標80")
+        fig_band.add_vline(x=80, line_dash="dot", line_color="green", annotation_text="最大80")
         fig_band.update_yaxes(categoryorder="array", categoryarray=lp_category_order)
         fig_band.update_layout(height=280, margin=dict(l=10, r=10, t=10, b=10), coloraxis_showscale=False)
         st.plotly_chart(fig_band, use_container_width=True)
@@ -1330,6 +1330,8 @@ def main() -> None:
                 color="件数",
                 color_continuous_scale="Purples",
             )
+            fig_mr.add_vline(x=60, line_dash="dash", line_color="orange", annotation_text="最低60")
+            fig_mr.add_vline(x=80, line_dash="dot", line_color="green", annotation_text="最大80")
             fig_mr.update_yaxes(
                 categoryorder="array",
                 categoryarray=["MASTER", "HIGH MASTER", "GRAND MASTER", "ULTIMATE MASTER"],
