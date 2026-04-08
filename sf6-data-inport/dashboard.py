@@ -462,6 +462,12 @@ def build_rank_options(df: pd.DataFrame) -> list[str]:
         "GRAND": 2,  "master_grand": 2,
         "ULTIMATE": 3, "master_ultimate": 3,
     }
+    # マスター4段階は常に選択肢に含める（DBにサンプルがなくても）
+    existing_ranks = set(grouped["ランク"].tolist())
+    missing_master = [r for r in ("MASTER", "HIGH", "GRAND", "ULTIMATE") if r not in existing_ranks]
+    if missing_master:
+        extra = pd.DataFrame({"ランク": missing_master, "lp_median": [25000.0] * len(missing_master)})
+        grouped = pd.concat([grouped, extra], ignore_index=True)
     grouped["_master_key"] = grouped["ランク"].map(_MASTER_TIER_ORDER).fillna(-1)
     grouped = grouped.sort_values(["lp_median", "_master_key", "ランク"])
     return grouped["ランク"].astype(str).tolist()
