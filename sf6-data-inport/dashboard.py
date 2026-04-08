@@ -92,6 +92,14 @@ _SUPABASE_COLUMNS: list[str] = (
 
 MASTER_RANK_SET = {"MASTER", "HIGH", "GRAND", "ULTIMATE"}
 
+# DBやBuckler APIから届く表記ゆれをすべて正規形に統一するマッピング
+_RANK_NORMALIZE: dict[str, str] = {
+    "master": "MASTER", "master_master": "MASTER", "MASTER": "MASTER", "MASTER MASTER": "MASTER",
+    "high": "HIGH",     "master_high": "HIGH",     "HIGH": "HIGH",     "HIGH MASTER": "HIGH",
+    "grand": "GRAND",   "master_grand": "GRAND",   "GRAND": "GRAND",   "GRAND MASTER": "GRAND",
+    "ultimate": "ULTIMATE", "master_ultimate": "ULTIMATE", "ULTIMATE": "ULTIMATE", "ULTIMATE MASTER": "ULTIMATE",
+}
+
 MASTER_RANK_ORDER = {"MASTER": 0, "HIGH": 1, "GRAND": 2, "ULTIMATE": 3}
 MASTER_RANK_LABELS = {
     "MASTER": "MASTER",
@@ -234,11 +242,8 @@ def _supabase_row_to_dict(row: dict[str, Any]) -> dict[str, Any]:
     li = row.get("league_info") or {}
     bs = (row.get("play") or {}).get("battle_stats") or {}
 
-    rank_name: str = (
-        (li.get("league_rank_info") or {}).get("league_rank_name")
-        or row.get("rank")
-        or ""
-    )
+    _raw_rank: str = row.get("rank") or (li.get("league_rank_info") or {}).get("league_rank_name") or ""
+    rank_name: str = _RANK_NORMALIZE.get(_raw_rank, _raw_rank)
     # LP値がなければrankから推定
     lp = li.get("league_point")
     if lp is None:
