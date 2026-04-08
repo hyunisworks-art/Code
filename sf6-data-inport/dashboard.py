@@ -1088,8 +1088,8 @@ def top_positive_negative(results: list[dict[str, Any]], top_n: int) -> tuple[pd
     positives = [r for r in results if r["correlation"] > 0][:top_n]
     negatives = sorted([r for r in results if r["correlation"] < 0], key=lambda x: x["correlation"])[:top_n]
 
-    pos_df = pd.DataFrame(positives)[["feature", "correlation", "n", "r_squared"]]
-    neg_df = pd.DataFrame(negatives)[["feature", "correlation", "n", "r_squared"]]
+    pos_df = pd.DataFrame(positives)[["feature", "mean", "correlation", "n", "r_squared"]]
+    neg_df = pd.DataFrame(negatives)[["feature", "mean", "correlation", "n", "r_squared"]]
     return pos_df, neg_df
 
 
@@ -1219,9 +1219,10 @@ def show_factor_section(title: str, results: list[dict[str, Any]], top_n: int, d
         if not pos_df.empty and "feature_display" in pos_df.columns:
             plot_factor_bar(pos_df, f"{title} 正相関 上位")
             st.dataframe(
-                pos_df[["feature_display", "correlation", "n", "r_squared"]],
+                pos_df[["feature_display", "mean", "correlation", "n", "r_squared"]].rename(columns={"feature_display": "指標", "mean": "平均値"}),
                 use_container_width=True,
                 hide_index=True,
+                column_config={"平均値": st.column_config.NumberColumn(format="%.1f")},
             )
         else:
             st.info("表示できる正相関要因がありません。")
@@ -1229,9 +1230,10 @@ def show_factor_section(title: str, results: list[dict[str, Any]], top_n: int, d
         if not neg_df.empty and "feature_display" in neg_df.columns:
             plot_factor_bar(neg_df, f"{title} 負相関 上位")
             st.dataframe(
-                neg_df[["feature_display", "correlation", "n", "r_squared"]],
+                neg_df[["feature_display", "mean", "correlation", "n", "r_squared"]].rename(columns={"feature_display": "指標", "mean": "平均値"}),
                 use_container_width=True,
                 hide_index=True,
+                column_config={"平均値": st.column_config.NumberColumn(format="%.1f")},
             )
         else:
             st.info("表示できる負相関要因がありません。")

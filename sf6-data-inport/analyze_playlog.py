@@ -161,6 +161,7 @@ def analyze_segment(
             {
                 "feature": feature,
                 "n": len(xs),
+                "mean": mean(xs),
                 "correlation": correlation,
                 "slope": slope,
                 "intercept": intercept,
