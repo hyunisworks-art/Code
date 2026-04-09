@@ -1106,7 +1106,7 @@ def top_positive_negative(results: list[dict[str, Any]], top_n: int) -> tuple[pd
 
 def plot_factor_bar(df: pd.DataFrame, title: str) -> None:
     if df.empty:
-        st.info("表示できる要因がありません。")
+        st.info("表示できる傾向指標がありません。")
         return
 
     chart_df = df.copy()
@@ -1156,7 +1156,7 @@ def make_summary_text(
             return None
         return sorted(negatives, key=lambda x: x["correlation"])[0]
 
-    # 総合ランク要因分析（progress_results）のみから最大正相関・最大負相関を探す
+    # 総合ランク傾向分析（progress_results）のみから最大正相関・最大負相関を探す
     all_results: list[dict[str, Any]] = list(progress_results or [])
 
     best_pos: dict[str, Any] | None = None
@@ -1182,11 +1182,11 @@ def make_summary_text(
     negative_takeaway: str | None = None
     if best_pos is not None:
         positive_takeaway = (
-            f"最大正相関要因: 「{feature_label(best_pos['feature'])}」（r={best_pos['correlation']:.3f}）— 伸ばすほどランクが上がる傾向"
+            f"最大正相関傾向指標: 「{feature_label(best_pos['feature'])}」（r={best_pos['correlation']:.3f}）— 伸ばすほどランクが上がる傾向"
         )
     if best_neg is not None:
         negative_takeaway = (
-            f"最大負相関要因: 「{feature_label(best_neg['feature'])}」（r={best_neg['correlation']:.3f}）— 下げるほどランクが上がる傾向"
+            f"最大負相関傾向指標: 「{feature_label(best_neg['feature'])}」（r={best_neg['correlation']:.3f}）— 下げるほどランクが上がる傾向"
         )
 
     # 詳細（3-4行）
@@ -1200,14 +1200,14 @@ def make_summary_text(
     if lp_neg:
         lp_parts.append(f"負相関: {feature_label(lp_neg['feature'])} r={lp_neg['correlation']:.3f}")
     if lp_parts:
-        detail_lines.append("LP要因 — " + " / ".join(lp_parts))
+        detail_lines.append("LP傾向指標 — " + " / ".join(lp_parts))
     mr_parts = []
     if mr_pos:
         mr_parts.append(f"正相関: {feature_label(mr_pos['feature'])} r={mr_pos['correlation']:.3f}")
     if mr_neg:
         mr_parts.append(f"負相関: {feature_label(mr_neg['feature'])} r={mr_neg['correlation']:.3f}")
     if mr_parts:
-        detail_lines.append("MR要因 — " + " / ".join(mr_parts))
+        detail_lines.append("MR傾向指標 — " + " / ".join(mr_parts))
     detail_lines.append("※探索分析。相関≠因果。効果量（R²）と n も合わせて判断すること。")
 
     return positive_takeaway, negative_takeaway, "\n".join(detail_lines)
@@ -1222,7 +1222,7 @@ def show_factor_section(title: str, results: list[dict[str, Any]], top_n: int, d
     neg_df = add_display_feature(neg_df)
 
     if pos_df.empty and neg_df.empty:
-        st.info("表示できる要因がありません。")
+        st.info("表示できる傾向指標がありません。")
         return
 
     left, right = st.columns(2)
@@ -1236,7 +1236,7 @@ def show_factor_section(title: str, results: list[dict[str, Any]], top_n: int, d
                 column_config={"平均値": st.column_config.NumberColumn(format="%.1f")},
             )
         else:
-            st.info("表示できる正相関要因がありません。")
+            st.info("表示できる正相関傾向指標がありません。")
     with right:
         if not neg_df.empty and "feature_display" in neg_df.columns:
             plot_factor_bar(neg_df, f"{title} 負相関 上位")
@@ -1247,7 +1247,7 @@ def show_factor_section(title: str, results: list[dict[str, Any]], top_n: int, d
                 column_config={"平均値": st.column_config.NumberColumn(format="%.1f")},
             )
         else:
-            st.info("表示できる負相関要因がありません。")
+            st.info("表示できる負相関傾向指標がありません。")
 
 
 def main() -> None:
@@ -1362,18 +1362,18 @@ def main() -> None:
         st.text(detail_text)
 
     show_factor_section(
-        "総合ランク要因分析",
+        "総合ランク傾向分析",
         progress_results,
         top_n,
         description=(
             "【対象】全サンプル（BRONZE〜DIAMOND + MASTER以上）。LP/MRをグループ内Zスコア化して統合した"
             "総合スコアを目的変数として各指標との相関係数を算出。"
-            "【注意】LP/MR要因分析の補完として解釈すること。"
+            "【注意】LP/MR傾向分析の補完として解釈すること。"
         ),
     )
 
     show_factor_section(
-        "LP要因分析",
+        "LP傾向分析",
         lp_results,
         top_n,
         description=(
@@ -1386,7 +1386,7 @@ def main() -> None:
     )
 
     show_factor_section(
-        "MR要因分析",
+        "MR傾向分析",
         mr_results,
         top_n,
         description=(

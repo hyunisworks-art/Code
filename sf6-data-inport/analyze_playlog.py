@@ -250,7 +250,7 @@ def write_results_csv(path: Path, results: list[dict[str, Any]]) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="sf6-playlog-out.csv の要因分析を行う")
+    parser = argparse.ArgumentParser(description="sf6-playlog-out.csv の傾向分析を行う")
     parser.add_argument("--input", default="sf6-playlog-out.csv", help="分析対象CSV")
     parser.add_argument(
         "--out-dir",
@@ -279,9 +279,9 @@ def main() -> None:
     print(f"LP 25000 以上: {len(master_rows)}件")
     print("注意: 件数が少ないため、この結果は探索的な相関分析として解釈してください")
 
-    print_section("LP要因分析（LP < 25000）", submaster_results)
-    print_section("MR要因分析（LP >= 25000）", master_results)
-    print_section("進捗スコア要因分析（LP/MR統合）", progress_results)
+    print_section("LP傾向分析（LP < 25000）", submaster_results)
+    print_section("MR傾向分析（LP >= 25000）", master_results)
+    print_section("進捗スコア傾向分析（LP/MR統合）", progress_results)
 
     write_results_csv(out_dir / "lp_factors.csv", submaster_results)
     write_results_csv(out_dir / "mr_factors.csv", master_results)
