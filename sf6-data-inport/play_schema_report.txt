@@ -1,0 +1,266 @@
+=== ランク分布 ===
+  master_grand: 80
+  master_high: 70
+  master_master: 70
+  gold: 61
+  bronze: 60
+  platinum: 60
+  silver: 60
+  diamond: 60
+  master: 60
+  : 2
+
+=== data_type分布 ===
+  sample: 581
+  personal: 2
+
+=== sample 1: 1989986156 / gold / 2026-03-29 ===
+  base_info (dict)
+  base_info.enjoy_user_point = int
+  base_info.enjoy_fight_point = int
+  base_info.enjoy_total_point = int
+  base_info.content_play_time_list (list)
+  base_info.content_play_time_list[0].play_time = int
+  base_info.content_play_time_list[0].content_type = int
+  base_info.content_play_time_list[0].content_type_name = str
+  season_ids (list)
+  battle_stats (dict)
+  battle_stats.stun = int
+  battle_stats.just_parry = float
+  battle_stats.throw_tech = float
+  battle_stats.corner_time = float
+  battle_stats.drive_parry = float
+  battle_stats.throw_count = float
+  battle_stats.drive_impact = float
+  battle_stats.cornered_time = float
+  battle_stats.gauge_rate_ca = float
+  battle_stats.received_stun = int
+  battle_stats.drive_reversal = int
+  battle_stats.punish_counter = float
+  battle_stats.gauge_rate_sa_lv1 = float
+  battle_stats.gauge_rate_sa_lv2 = float
+  battle_stats.gauge_rate_sa_lv3 = float
+  battle_stats.throw_drive_parry = int
+  battle_stats.target_clear_count = int
+  battle_stats.received_throw_count = float
+  battle_stats.gauge_rate_drive_arts = float
+  battle_stats.rank_match_play_count = int
+  battle_stats.received_drive_impact = float
+  battle_stats.gauge_rate_drive_guard = float
+  battle_stats.gauge_rate_drive_other = float
+  battle_stats.casual_match_play_count = int
+  battle_stats.gauge_rate_drive_impact = float
+  battle_stats.received_punish_counter = float
+  battle_stats.gauge_rate_drive_reversal = int
+  battle_stats.received_throw_drive_parry = float
+  battle_stats.battle_hub_match_play_count = int
+  battle_stats.custom_room_match_play_count = int
+  battle_stats.drive_impact_to_drive_impact = float
+  battle_stats.rival_ai_highest_league_rank = int
+  battle_stats.total_all_character_play_point = int
+  battle_stats.gauge_rate_drive_rush_from_parry = float
+  battle_stats.rival_ai_highest_league_rank_txt = str
+  battle_stats.gauge_rate_drive_rush_from_cancel = float
+  battle_stats.rival_ai_achieved_challenge_count = int
+  battle_stats.received_drive_impact_to_drive_impact = float
+  current_season_id = int
+  character_win_rates (list)
+  character_win_rates[0].win_count = int
+  character_win_rates[0].battle_count = int
+  character_win_rates[0].character_id = int
+  character_win_rates[0].character_name = str
+  character_win_rates[0].character_sort = int
+  character_win_rates[0].character_alpha = str
+  character_win_rates[0].character_tool_name = str
+  character_league_infos (list)
+  character_league_infos[0].is_played = bool
+  character_league_infos[0].league_info (dict)
+  character_league_infos[0].league_info.league_rank = int
+  character_league_infos[0].league_info.league_point = int
+  character_league_infos[0].league_info.master_league = int
+  character_league_infos[0].league_info.master_rating = int
+  character_league_infos[0].league_info.master_rating_ranking = int
+  character_league_infos[0].character_id = int
+  character_league_infos[0].character_name = str
+  character_league_infos[0].character_sort = int
+  character_league_infos[0].character_alpha = str
+  character_league_infos[0].character_tool_name = str
+  character_play_point_infos (list)
+  character_play_point_infos[0].play_point (dict)
+  character_play_point_infos[0].play_point.battle_hub = int
+  character_play_point_infos[0].play_point.world_tour = int
+  character_play_point_infos[0].play_point.fighting_ground = int
+  character_play_point_infos[0].character_id = int
+  character_play_point_infos[0].character_name = str
+  character_play_point_infos[0].character_sort = int
+  character_play_point_infos[0].character_alpha = str
+  character_play_point_infos[0].character_tool_name = str
+  ... (total 94 keys)
+
+=== sample 2: 1991056938 / gold / 2026-03-29 ===
+  base_info (dict)
+  base_info.enjoy_user_point = int
+  base_info.enjoy_fight_point = int
+  base_info.enjoy_total_point = int
+  base_info.content_play_time_list (list)
+  base_info.content_play_time_list[0].play_time = int
+  base_info.content_play_time_list[0].content_type = int
+  base_info.content_play_time_list[0].content_type_name = str
+  season_ids (list)
+  battle_stats (dict)
+  battle_stats.stun = int
+  battle_stats.just_parry = float
+  battle_stats.throw_tech = float
+  battle_stats.corner_time = float
+  battle_stats.drive_parry = float
+  battle_stats.throw_count = float
+  battle_stats.drive_impact = float
+  battle_stats.cornered_time = int
+  battle_stats.gauge_rate_ca = float
+  battle_stats.received_stun = int
+  battle_stats.drive_reversal = float
+  battle_stats.punish_counter = float
+  battle_stats.gauge_rate_sa_lv1 = float
+  battle_stats.gauge_rate_sa_lv2 = float
+  battle_stats.gauge_rate_sa_lv3 = float
+  battle_stats.throw_drive_parry = float
+  battle_stats.target_clear_count = int
+  battle_stats.received_throw_count = float
+  battle_stats.gauge_rate_drive_arts = float
+  battle_stats.rank_match_play_count = int
+  battle_stats.received_drive_impact = float
+  battle_stats.gauge_rate_drive_guard = float
+  battle_stats.gauge_rate_drive_other = float
+  battle_stats.casual_match_play_count = int
+  battle_stats.gauge_rate_drive_impact = float
+  battle_stats.received_punish_counter = float
+  battle_stats.gauge_rate_drive_reversal = float
+  battle_stats.received_throw_drive_parry = float
+  battle_stats.battle_hub_match_play_count = int
+  battle_stats.custom_room_match_play_count = int
+  battle_stats.drive_impact_to_drive_impact = float
+  battle_stats.rival_ai_highest_league_rank = int
+  battle_stats.total_all_character_play_point = int
+  battle_stats.gauge_rate_drive_rush_from_parry = float
+  battle_stats.rival_ai_highest_league_rank_txt = str
+  battle_stats.gauge_rate_drive_rush_from_cancel = int
+  battle_stats.rival_ai_achieved_challenge_count = int
+  battle_stats.received_drive_impact_to_drive_impact = int
+  current_season_id = int
+  character_win_rates (list)
+  character_win_rates[0].win_count = int
+  character_win_rates[0].battle_count = int
+  character_win_rates[0].character_id = int
+  character_win_rates[0].character_name = str
+  character_win_rates[0].character_sort = int
+  character_win_rates[0].character_alpha = str
+  character_win_rates[0].character_tool_name = str
+  character_league_infos (list)
+  character_league_infos[0].is_played = bool
+  character_league_infos[0].league_info (dict)
+  character_league_infos[0].league_info.league_rank = int
+  character_league_infos[0].league_info.league_point = int
+  character_league_infos[0].league_info.master_league = int
+  character_league_infos[0].league_info.master_rating = int
+  character_league_infos[0].league_info.master_rating_ranking = int
+  character_league_infos[0].character_id = int
+  character_league_infos[0].character_name = str
+  character_league_infos[0].character_sort = int
+  character_league_infos[0].character_alpha = str
+  character_league_infos[0].character_tool_name = str
+  character_play_point_infos (list)
+  character_play_point_infos[0].play_point (dict)
+  character_play_point_infos[0].play_point.battle_hub = int
+  character_play_point_infos[0].play_point.world_tour = int
+  character_play_point_infos[0].play_point.fighting_ground = int
+  character_play_point_infos[0].character_id = int
+  character_play_point_infos[0].character_name = str
+  character_play_point_infos[0].character_sort = int
+  character_play_point_infos[0].character_alpha = str
+  character_play_point_infos[0].character_tool_name = str
+  ... (total 94 keys)
+
+=== sample 3: 2030549283 / bronze / 2026-03-29 ===
+  base_info (dict)
+  base_info.enjoy_user_point = int
+  base_info.enjoy_fight_point = int
+  base_info.enjoy_total_point = int
+  base_info.content_play_time_list (list)
+  base_info.content_play_time_list[0].play_time = int
+  base_info.content_play_time_list[0].content_type = int
+  base_info.content_play_time_list[0].content_type_name = str
+  season_ids (list)
+  battle_stats (dict)
+  battle_stats.stun = int
+  battle_stats.just_parry = int
+  battle_stats.throw_tech = float
+  battle_stats.corner_time = float
+  battle_stats.drive_parry = int
+  battle_stats.throw_count = float
+  battle_stats.drive_impact = float
+  battle_stats.cornered_time = float
+  battle_stats.gauge_rate_ca = float
+  battle_stats.received_stun = int
+  battle_stats.drive_reversal = int
+  battle_stats.punish_counter = float
+  battle_stats.gauge_rate_sa_lv1 = float
+  battle_stats.gauge_rate_sa_lv2 = float
+  battle_stats.gauge_rate_sa_lv3 = int
+  battle_stats.throw_drive_parry = float
+  battle_stats.target_clear_count = int
+  battle_stats.received_throw_count = float
+  battle_stats.gauge_rate_drive_arts = float
+  battle_stats.rank_match_play_count = int
+  battle_stats.received_drive_impact = float
+  battle_stats.gauge_rate_drive_guard = float
+  battle_stats.gauge_rate_drive_other = float
+  battle_stats.casual_match_play_count = int
+  battle_stats.gauge_rate_drive_impact = float
+  battle_stats.received_punish_counter = int
+  battle_stats.gauge_rate_drive_reversal = int
+  battle_stats.received_throw_drive_parry = int
+  battle_stats.battle_hub_match_play_count = int
+  battle_stats.custom_room_match_play_count = int
+  battle_stats.drive_impact_to_drive_impact = float
+  battle_stats.rival_ai_highest_league_rank = int
+  battle_stats.total_all_character_play_point = int
+  battle_stats.gauge_rate_drive_rush_from_parry = float
+  battle_stats.rival_ai_highest_league_rank_txt = str
+  battle_stats.gauge_rate_drive_rush_from_cancel = float
+  battle_stats.rival_ai_achieved_challenge_count = int
+  battle_stats.received_drive_impact_to_drive_impact = int
+  current_season_id = int
+  character_win_rates (list)
+  character_win_rates[0].win_count = int
+  character_win_rates[0].battle_count = int
+  character_win_rates[0].character_id = int
+  character_win_rates[0].character_name = str
+  character_win_rates[0].character_sort = int
+  character_win_rates[0].character_alpha = str
+  character_win_rates[0].character_tool_name = str
+  character_league_infos (list)
+  character_league_infos[0].is_played = bool
+  character_league_infos[0].league_info (dict)
+  character_league_infos[0].league_info.league_rank = int
+  character_league_infos[0].league_info.league_point = int
+  character_league_infos[0].league_info.master_league = int
+  character_league_infos[0].league_info.master_rating = int
+  character_league_infos[0].league_info.master_rating_ranking = int
+  character_league_infos[0].character_id = int
+  character_league_infos[0].character_name = str
+  character_league_infos[0].character_sort = int
+  character_league_infos[0].character_alpha = str
+  character_league_infos[0].character_tool_name = str
+  character_play_point_infos (list)
+  character_play_point_infos[0].play_point (dict)
+  character_play_point_infos[0].play_point.battle_hub = int
+  character_play_point_infos[0].play_point.world_tour = int
+  character_play_point_infos[0].play_point.fighting_ground = int
+  character_play_point_infos[0].character_id = int
+  character_play_point_infos[0].character_name = str
+  character_play_point_infos[0].character_sort = int
+  character_play_point_infos[0].character_alpha = str
+  character_play_point_infos[0].character_tool_name = str
+  ... (total 94 keys)
+
+raw sample: play_sample_raw.json

@@ -1,0 +1,9 @@
+SUPABASE_URL set: True
+SUPABASE_KEY set: True
+OK: client作成成功
+OK: select成功 / total_count=583 / sample_rows=1
+  先頭ID: 249141ef-17fd-460e-8b06-23f6217c5863
+OK: 軽量取得成功 / 取得件数=3
+  {'player_id': '1989986156', 'fetch_date': '2026-03-29', 'data_type': 'sample'}
+  {'player_id': '1991056938', 'fetch_date': '2026-03-29', 'data_type': 'sample'}
+  {'player_id': '2030549283', 'fetch_date': '2026-03-29', 'data_type': 'sample'}

@@ -334,3 +334,82 @@ cd "c:\Users\hyuni\OneDrive\ドキュメント\GitHub\Code\sf6-data-inport"
 - Python 3.13+
 - 基本機能（収集・整形・傾向分析）は標準ライブラリのみ
 - ダッシュボード機能は `streamlit`, `plotly`, `pandas` が必要
+
+---
+
+## #04記事用 ゲージ推移分析スクリプト（2026-04-18 追加）
+
+note記事「スト６を数字で見てみた #04｜ゲージの使い方は、LPとMRでどう変わるか」用の分析スクリプト群。
+
+### 新規スクリプト
+
+| ファイル | 用途 |
+|---|---|
+| `_plot_gauge_continuous.py` | LP/MR連続軸でDゲージ・SAゲージ使用率を散布＋ガウシアン平滑化で可視化（グラフ4枚出力） |
+| `_collect_mr_band.py` | MR 1500-1800 帯のサンプルをBucklerランキングから追加取得してSupabase投入 |
+| `_probe_mr_pages.py` | マスターランキングの飛び飛びページからMR分布を確認（取得戦略の立案用） |
+| `_count_sample_split.py` | 全サンプルを最高到達LP・最高到達MR基準で分類カウント |
+| `_inspect_sa_boundary.py` | 特定ランクのSAゲージ記述統計（集計検証用） |
+| `_aggregate_gauge_by_rank.py` | ランク順序×ゲージ使用率のSpearman順位相関を出力 |
+
+### Bucklerマスターランキングの構造（重要）
+
+- マスターランキングは **「キャラ単位のエントリ」**。1プレイヤーが複数キャラでマスター到達していたら複数回ランキングに載る
+- favorite_character_league_info（現在選択中キャラ）のMR順で並ぶ
+- そのため **前半ページ（1〜500あたり）にはサブキャラでMR 1500-1800のエントリが混じる**（本人はハイマス以上）→ 一次絞込を通っても最高MRが1840+で全件破棄になりがち
+- **page 3000 周辺**: MR 1655近辺に同値が集中（Bucklerランキングの区切り仕様と推測）
+- **page 15000 周辺**: MR 1344-1831（広めに分布）
+- **page 25000 周辺**: MR 1382-1587（マスター到達直後の下限層）
+
+### サンプリング戦略（MR 1500-1800 帯を集める手順）
+
+表示MR（ランキング上）と最高到達MR（プレイヤー全キャラの最大MR）は乖離するため、二段階フィルタが必須。
+
+1. `scrape_rankings.py` または `_collect_mr_band.py` でランキングページからshort_id取得
+2. **一次絞込**: 表示MR で 1500-1800 フィルタ
+3. Buckler profile API で play データ取得
+4. **二次検証**: 全is_playedキャラから最高到達MRを計算
+5. 最高MRが 1500-1800 範囲内のサンプルのみSupabaseへ投入
+
+`_collect_mr_band.py` は上記の手順を一括で実行。MAX_REQUESTS_PER_SESSION=50 の制約があり、1セッションで約30件投入できる。
+
+### 実行例
+
+```powershell
+cd "c:\Users\hyuni\OneDrive\ドキュメント\GitHub\Code\sf6-data-inport"
+
+# 1. マスターランキングの飛び飛びページからMR分布を確認（取得戦略立案）
+& "c:/Users/hyuni/OneDrive/ドキュメント/GitHub/Code/.venv/Scripts/python.exe" _probe_mr_pages.py
+
+# 2. MR 1500-1800 帯を追加取得（dry-run）
+& "c:/Users/hyuni/OneDrive/ドキュメント/GitHub/Code/.venv/Scripts/python.exe" _collect_mr_band.py --page-start 2995 --page-end 3005 --dry-run
+
+# 3. 本取得（page 3000周辺 / page 15000周辺 / page 25000周辺 を組み合わせて均等分布を狙う）
+& "c:/Users/hyuni/OneDrive/ドキュメント/GitHub/Code/.venv/Scripts/python.exe" _collect_mr_band.py --page-start 2995 --page-end 3005
+& "c:/Users/hyuni/OneDrive/ドキュメント/GitHub/Code/.venv/Scripts/python.exe" _collect_mr_band.py --page-start 25000 --page-end 25010
+& "c:/Users/hyuni/OneDrive/ドキュメント/GitHub/Code/.venv/Scripts/python.exe" _collect_mr_band.py --page-start 15000 --page-end 15010
+
+# 4. グラフ生成（analysis-output/ に4枚PNG）
+& "c:/Users/hyuni/OneDrive/ドキュメント/GitHub/Code/.venv/Scripts/python.exe" _plot_gauge_continuous.py
+
+# 5. 分類カウント（対象・除外の内訳を確認）
+& "c:/Users/hyuni/OneDrive/ドキュメント/GitHub/Code/.venv/Scripts/python.exe" _count_sample_split.py
+```
+
+### 記事用データ（2026-04-18時点）
+
+- Supabase 全734件（初期581件 + 今回取得153件）
+- 対象内訳:
+  - MR帯（最高MR 1500-1800）: 132件（縦帯MR 1655-1656 を各12件上限で間引き）
+  - LP帯（最高LP 3000-24999）: 114件
+  - 合計対象: 246件
+- 除外: ハイマス以上（最高MR>1800）281件・累積LP>24999 が27件・LP/MR取れず153件
+
+### 分析の基準値
+
+- LP範囲: 3000 〜 24999（ブロンズ〜ダイヤ相当）
+- MR範囲: 1500 〜 1800（マスター到達 〜 ハイマス到達ライン）
+- グラフX軸: LP値・MR値そのまま（連続軸）
+- 平滑化: ガウシアンカーネル（bandwidth_frac=0.12・200点リサンプリング）
+- Y軸上限: 60%で固定（D/SA両方）
+- 同一MR値の縦帯対策: 各MR値の件数を上限12件で間引き

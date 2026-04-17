@@ -1,0 +1,3 @@
+host: xbwgpgadgmsqghpivgfp.supabase.co
+NG: DNS解決失敗 (gaierror: [Errno 11001] getaddrinfo failed)
+対照: supabase.com -> 216.150.1.193 (ネット側は生存)
